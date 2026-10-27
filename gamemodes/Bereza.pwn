@@ -209,11 +209,12 @@ new const RentTariffs[][E_TARIFF] =
 #define MAX_BOTTLES 5
 new const Float:BottlePos[MAX_BOTTLES][3] =
 {
-    {1765.0, -1915.0, 13.55},
-    {1790.0, -1925.0, 13.40},
-    {1745.0, -1930.0, 13.55},
-    {1815.0, -1915.0, 13.40},
-    {1775.0, -1882.0, 13.55}
+    // Точки на відкритому майданчику між спавном і Віталіком (там, де гравець точно ходить)
+    {1768.0, -1893.0, 13.56},
+    {1778.0, -1906.0, 13.56},
+    {1788.0, -1896.0, 13.56},
+    {1792.0, -1901.0, 13.56},
+    {1764.0, -1905.0, 13.56}
 };
 new STREAMER_TAG_PICKUP:BottlePickup[MAX_PLAYERS][MAX_BOTTLES];
 new STREAMER_TAG_MAP_ICON:BottleIcon[MAX_PLAYERS][MAX_BOTTLES];
