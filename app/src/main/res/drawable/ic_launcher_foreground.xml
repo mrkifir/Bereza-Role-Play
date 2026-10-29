@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Знак Bereza RP: стовбур берези (біла кора з насічками) + два листки, що утворюють літеру «B». -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- стовбур -->
+    <path android:fillColor="#ECE9E1"
+        android:pathData="M40,30h8v48h-8a2,2 0,0 1,-2 -2v-44a2,2 0,0 1,2 -2z" />
+    <!-- насічки кори -->
+    <path android:fillColor="#141716" android:pathData="M38,37h5v1.8h-5z" />
+    <path android:fillColor="#141716" android:pathData="M41,46h7v1.8h-7z" />
+    <path android:fillColor="#141716" android:pathData="M38,59h4v1.8h-4z" />
+    <path android:fillColor="#141716" android:pathData="M42,69h6v1.8h-6z" />
+    <!-- верхній листок -->
+    <path android:fillColor="#8CC63F"
+        android:pathData="M49,31Q70,31 70,43Q66,53.5 49,53.5Z" />
+    <!-- нижній листок -->
+    <path android:fillColor="#8CC63F"
+        android:pathData="M49,55.5Q75,55.5 75,67Q70.5,78 49,78Z" />
+    <!-- прожилки -->
+    <path android:strokeColor="#141716" android:strokeWidth="1.2"
+        android:strokeLineCap="round" android:pathData="M51,42.5L65,42.5" />
+    <path android:strokeColor="#141716" android:strokeWidth="1.2"
+        android:strokeLineCap="round" android:pathData="M51,66.8L69,66.8" />
+</vector>

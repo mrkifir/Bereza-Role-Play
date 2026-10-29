@@ -1,0 +1,52 @@
+{
+  "manifestVersion": 1,
+  "gameVersion": "1.0.0",
+  "minLauncherVersionCode": 1,
+
+  "server": {
+    "name": "Bereza Role Play",
+    "host": "CHANGE_ME.example.com",
+    "port": 7777,
+    "clientVersion": "0.3.7"
+  },
+
+  "files": [
+    {
+      "path": "bereza/textures.zip",
+      "size": 0,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source": "remote",
+      "url": "files/bereza/textures.zip",
+      "extract": true,
+      "extractTo": "bereza/textures/",
+      "unpackedSize": 0
+    },
+    {
+      "path": "models/gta3.img",
+      "size": 0,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source": "user",
+      "userFileName": "gta3.img",
+      "_comment": "Файл оригінальної гри — береться з власної копії гравця. SHA-256 порахуйте зі своєї легальної копії."
+    }
+  ],
+
+  "client": {
+    "displayName": "",
+    "packageName": "",
+    "minVersionCode": 0,
+    "apkUrl": "",
+    "apkSha256": "",
+    "apkSize": 0,
+    "signingCertSha256": "",
+    "infoUrl": ""
+  },
+
+  "launch": {
+    "mode": "none",
+    "activity": "",
+    "extras": {},
+    "uriTemplate": "",
+    "configFile": null
+  }
+}
