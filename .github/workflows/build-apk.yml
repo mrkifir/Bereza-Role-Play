@@ -1,0 +1,74 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, launcher-apk ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Signing key (optional)
+        env:
+          KS_B64: ${{ secrets.BEREZA_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/bereza.jks"
+            echo "BEREZA_KEYSTORE=$RUNNER_TEMP/bereza.jks" >> "$GITHUB_ENV"
+            echo "Release key: found"
+          else
+            echo "Release key: not set, APK will be signed with a temporary debug key"
+          fi
+
+      - name: Build release APK
+        env:
+          BEREZA_KEY_PASSWORD: ${{ secrets.BEREZA_KEY_PASSWORD }}
+        run: |
+          set -o pipefail
+          gradle --no-daemon assembleRelease 2>&1 | tee "$RUNNER_TEMP/build.log"
+
+      - name: SHA-256
+        run: |
+          cd app/build/outputs/apk/release
+          for f in *.apk; do sha256sum "$f" | tee "$f.sha256"; done
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BerezaLauncher-apk
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/release/*.sha256
+
+      - name: Publish result to branch launcher-apk-output
+        if: always()
+        run: |
+          OUT="$RUNNER_TEMP/out"; mkdir -p "$OUT"
+          cp "$RUNNER_TEMP/build.log" "$OUT/" 2>/dev/null || true
+          cp app/build/outputs/apk/release/*.apk "$OUT/" 2>/dev/null || true
+          cp app/build/outputs/apk/release/*.sha256 "$OUT/" 2>/dev/null || true
+          echo "${{ job.status }} $GITHUB_SHA" > "$OUT/STATUS.txt"
+          cd "$OUT"
+          git init -q -b launcher-apk-output
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add -A && git commit -qm "Build output for $GITHUB_SHA"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" launcher-apk-output

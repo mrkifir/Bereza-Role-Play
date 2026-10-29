@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Українська — мова за замовчуванням.
+     Щоб додати іншу мову: створи res/values-pl/strings.xml (або values-en, values-ru…)
+     з тими самими name і перекладеними значеннями. -->
+<resources>
+    <string name="app_name">Bereza RP</string>
+
+    <!-- Навігація -->
+    <string name="nav_home">Головна</string>
+    <string name="nav_news">Новини</string>
+    <string name="nav_files">Файли</string>
+    <string name="nav_settings">Налаштування</string>
+    <string name="nav_server">Сервер</string>
+    <string name="nav_install">Встановлення</string>
+    <string name="nav_compat">Сумісність</string>
+    <string name="nav_diagnostics">Діагностика</string>
+    <string name="nav_about">Про проєкт</string>
+
+    <!-- Дії -->
+    <string name="action_back">Назад</string>
+    <string name="action_play">ГРАТИ</string>
+    <string name="action_refresh">Оновити</string>
+    <string name="action_retry">Спробувати ще</string>
+    <string name="action_check">Перевірити</string>
+    <string name="action_cancel">Скасувати</string>
+    <string name="action_save">Зберегти</string>
+    <string name="action_reset">Скинути</string>
+    <string name="action_copy_address">Копіювати адресу</string>
+    <string name="action_all_news">Усі</string>
+    <string name="action_open_link">Відкрити посилання</string>
+    <string name="action_pick_folder">Обрати папку гри</string>
+    <string name="action_change_folder">Змінити папку</string>
+    <string name="action_pick_source">Обрати папку-джерело</string>
+    <string name="action_start_copy">Копіювати файли</string>
+    <string name="action_verify">ПЕРЕВІРИТИ ФАЙЛИ</string>
+    <string name="action_verify_after_copy">Перевірити файли після копіювання</string>
+    <string name="action_go_install">Перейти до встановлення</string>
+    <string name="action_build_manifest">Створити маніфест з цієї папки</string>
+    <string name="action_import_manifest">Імпортувати маніфест (.json)</string>
+    <string name="action_reset_manifest">Повернути вбудований маніфест</string>
+    <string name="action_download_update">ЗАВАНТАЖИТИ ОНОВЛЕННЯ</string>
+    <string name="action_install_update">ВСТАНОВИТИ</string>
+    <string name="action_test_server">Тест сервера</string>
+    <string name="action_clear_log">Очистити журнал</string>
+    <string name="action_copy_report">Копіювати звіт</string>
+    <string name="action_share">Поділитися</string>
+    <string name="action_share_report">Надіслати звіт</string>
+    <string name="action_forget_folder">Забути папку</string>
+
+    <!-- Загальні стани -->
+    <string name="state_loading">Завантаження…</string>
+    <string name="state_preparing">Підготовка…</string>
+    <string name="yes">Так</string>
+    <string name="no">Ні</string>
+    <string name="not_selected">Не обрано</string>
+    <string name="not_set">Не задано</string>
+    <string name="launcher_version_fmt">Лаунчер v%1$s (збірка %2$d)</string>
+
+    <!-- Сервер -->
+    <string name="server_online">Онлайн</string>
+    <string name="server_offline">Сервер недоступний</string>
+    <string name="server_checking">Перевірка…</string>
+    <string name="server_no_internet">Немає інтернету</string>
+    <string name="server_not_configured">Адресу сервера не налаштовано</string>
+    <string name="server_passworded">Вхід за паролем</string>
+    <string name="players_fmt">%1$d / %2$d гравців</string>
+    <string name="ping_fmt">%1$d мс</string>
+    <string name="server_rules_empty">Сервер не повернув правила або ще не перевірено.</string>
+    <string name="server_protocol_note">Статус, кількість гравців і пінг отримуються напряму від сервера через документований SA-MP Query протокол (UDP). Лаунчер не показує жодних вигаданих чисел.</string>
+    <string name="label_address">Адреса</string>
+    <string name="label_hostname">Назва</string>
+    <string name="label_players">Гравці</string>
+    <string name="label_ping">Пінг</string>
+    <string name="label_gamemode">Режим</string>
+    <string name="label_language">Мова</string>
+    <string name="label_password">Пароль</string>
+    <string name="label_checked_at">Перевірено</string>
+    <string name="label_error">Помилка</string>
+    <string name="section_server_rules">Правила сервера</string>
+    <string name="section_how_it_works">Як це працює</string>
+    <string name="msg_address_copied">Адресу сервера скопійовано</string>
+
+    <!-- Нікнейм / запуск -->
+    <string name="nickname_label">Ігровий нікнейм</string>
+    <string name="nickname_placeholder">Ivan_Bereza</string>
+    <string name="nickname_hint_rp">Формат Ім’я_Прізвище латиницею</string>
+    <string name="nickname_hint">3–20 символів: A–Z, 0–9, _ [ ] ( ) $ @ . =</string>
+    <string name="client_installed_fmt">Клієнт: %1$s v%2$s</string>
+    <string name="client_not_installed_fmt">Клієнт %1$s не встановлено</string>
+    <string name="client_not_configured_short">Пакет клієнта не задано</string>
+    <string name="client_no_activity_short">Клієнт не можна відкрити (немає екрана запуску)</string>
+    <string name="msg_launch_direct">Клієнт запущено з підключенням до сервера</string>
+    <string name="msg_launch_copied">Клієнт відкрито. Адресу %1$s скопійовано — встав її в клієнті й укажи нік %2$s</string>
+    <string name="msg_launch_manual">Клієнт відкрито. Додай сервер %1$s і нік %2$s у клієнті вручну</string>
+    <string name="msg_client_not_configured">Вкажи пакет клієнта в налаштуваннях</string>
+    <string name="msg_client_not_installed">Клієнт (%1$s) не встановлено. Відкрий «Сумісність»</string>
+    <string name="msg_client_no_activity">Клієнт встановлено, але його неможливо відкрити</string>
+    <string name="msg_launch_failed">Не вдалося запустити клієнт: %1$s</string>
+
+    <!-- Помилки нікнейму -->
+    <string name="err_nick_empty">Введи нікнейм</string>
+    <string name="err_nick_length">Довжина нікнейму — від %1$d до %2$d символів</string>
+    <string name="err_nick_chars">Дозволені лише A–Z, a–z, 0–9 та _ [ ] ( ) $ @ . =</string>
+    <string name="err_nick_rp">Потрібен формат Ім’я_Прізвище, напр. Ivan_Bereza</string>
+
+    <!-- Мережеві помилки -->
+    <string name="err_dns">Не вдалося знайти адресу сервера (DNS)</string>
+    <string name="err_no_ipv4">Для адреси сервера немає IPv4</string>
+    <string name="err_server_timeout">Сервер не відповідає. Можливо, він вимкнений або UDP заблоковано</string>
+    <string name="err_server_malformed">Сервер повернув некоректну відповідь</string>
+    <string name="err_network">Помилка мережі. Перевір з’єднання</string>
+    <string name="err_timeout">Час очікування вичерпано</string>
+    <string name="err_not_configured">Адресу не налаштовано</string>
+    <string name="err_insecure_url">Дозволено лише https-адреси</string>
+    <string name="err_bad_url">Некоректна адреса</string>
+    <string name="err_http_status">Сервер відповів кодом HTTP %1$d</string>
+    <string name="err_too_large">Відповідь завелика</string>
+    <string name="err_bad_json">Неправильний формат JSON</string>
+    <string name="err_invalid_data">Неправильні дані: %1$s</string>
+    <string name="err_unexpected">Неочікувана помилка: %1$s</string>
+
+    <!-- Головна -->
+    <string name="section_updates">Останні оновлення</string>
+    <string name="section_news">Новини проєкту</string>
+    <string name="section_links">Офіційні ресурси</string>
+    <string name="link_site">Сайт</string>
+    <string name="updates_not_configured">Канал оновлень не налаштовано або перевірку вимкнено.</string>
+    <string name="update_version_fmt">Версія %1$s</string>
+    <string name="update_available">Доступне оновлення</string>
+    <string name="update_current">Актуальна</string>
+    <string name="update_no_changelog">Список змін не опубліковано.</string>
+
+    <!-- Новини -->
+    <string name="news_not_configured">Канал новин не налаштовано</string>
+    <string name="news_setup_hint">Вкажи news.url у bereza.properties (JSON за https). Формат описано в README.</string>
+    <string name="news_empty">Новин поки немає.</string>
+
+    <!-- Файли -->
+    <string name="section_game_folder">Папка гри</string>
+    <string name="section_manifest">Маніфест файлів</string>
+    <string name="section_verify">Перевірка цілісності</string>
+    <string name="folder_not_selected">Папку з файлами гри не обрано.</string>
+    <string name="folder_pick_hint">Обери папку з даними твого легального клієнта (наприклад, MordorMobile у внутрішній пам’яті). Лаунчер отримує доступ лише до неї.</string>
+    <string name="label_folder">Папка</string>
+    <string name="label_access">Доступ</string>
+    <string name="access_ok">Є</string>
+    <string name="access_lost">Доступ втрачено — обери папку ще раз</string>
+    <string name="label_manifest">Назва</string>
+    <string name="label_files_count">Файлів у списку</string>
+    <string name="label_source">Джерело</string>
+    <string name="manifest_bundled">Вбудований у лаунчер</string>
+    <string name="manifest_custom">Імпортований / створений</string>
+    <string name="manifest_empty_hint">Маніфест порожній. Обери робочу (еталонну) папку гри і натисни «Створити маніфест» — лаунчер запише розміри та SHA-256 усіх файлів, і надалі перевірятиме їх.</string>
+    <string name="verify_not_run">Перевірку ще не запускали.</string>
+    <string name="progress_files_fmt">%1$d з %2$d: %3$s</string>
+    <string name="msg_verify_ok">Усі %1$d файлів у порядку</string>
+    <string name="msg_verify_problems">Проблем знайдено: %1$d</string>
+    <string name="msg_manifest_empty">Маніфест порожній — спершу створи або імпортуй його</string>
+    <string name="msg_manifest_built">Маніфест створено: %1$d файлів</string>
+    <string name="msg_manifest_imported">Маніфест імпортовано: %1$d файлів</string>
+    <string name="msg_cancelled">Скасовано</string>
+    <string name="err_no_folder">Спершу обери папку гри на вкладці «Файли»</string>
+    <string name="err_folder_permission">Система не надала постійний доступ до папки</string>
+    <string name="check_ok">SHA-256 збігається</string>
+    <string name="check_present">Файл є (контрольну суму не задано)</string>
+    <string name="check_missing">Відсутній обов’язковий файл</string>
+    <string name="check_missing_optional">Відсутній (необов’язковий)</string>
+    <string name="check_size_fmt">Розмір %1$s, очікувалось %2$s</string>
+    <string name="check_hash">Контрольна сума не збігається — файл пошкоджено або змінено</string>
+    <string name="check_unreadable_fmt">Не вдалося прочитати: %1$s</string>
+
+    <!-- Встановлення -->
+    <string name="section_legal">Правові умови</string>
+    <string name="install_legal_note">Лаунчер не завантажує GTA San Andreas, APK гри чи клієнт SA-MP. Встанови %1$s та ігрові файли самостійно з легального джерела, а тут лише скопіюй і перевір їх.</string>
+    <string name="section_copy_files">Копіювання файлів гри</string>
+    <string name="label_target">Призначення</string>
+    <string name="install_target_hint">Папку призначення (папку гри) обирають на вкладці «Файли».</string>
+    <string name="overwrite_title">Перезаписувати</string>
+    <string name="overwrite_hint">Вимкнено: файли з таким самим розміром пропускаються</string>
+    <string name="progress_copy_fmt">%1$s з %2$s · файл %3$d з %4$d</string>
+    <string name="label_copied">Скопійовано</string>
+    <string name="label_skipped">Пропущено</string>
+    <string name="label_failed">Помилки</string>
+    <string name="msg_copy_done">Готово: скопійовано %1$d, пропущено %2$d</string>
+    <string name="msg_copy_failed_some">Не вдалося скопіювати файлів: %1$d (див. діагностику)</string>
+    <string name="err_no_source">Обери папку-джерело</string>
+    <string name="section_launcher_update">Оновлення лаунчера</string>
+    <string name="label_current_version">Поточна версія</string>
+    <string name="msg_update_ready">Оновлення завантажено та перевірено (SHA-256)</string>
+    <string name="msg_install_permission">Дозволь лаунчеру встановлювати застосунки, потім натисни «Встановити» ще раз</string>
+    <string name="err_no_installer">Не знайдено системного інсталятора</string>
+    <string name="err_update_unsigned">В описі оновлення немає https-посилання або SHA-256 — встановлення заблоковано</string>
+    <string name="update_signature_note">Android встановить оновлення лише якщо APK підписаний тим самим ключем, що й поточна версія.</string>
+
+    <!-- Сумісність -->
+    <string name="compat_android">Версія Android</string>
+    <string name="compat_android_detail">Android %1$s (API %2$d) — підтримується (мінімум 8.0)</string>
+    <string name="compat_abi">Архітектура процесора</string>
+    <string name="compat_internet">Інтернет</string>
+    <string name="compat_internet_ok">Підключено</string>
+    <string name="compat_internet_fail">Немає підключення</string>
+    <string name="compat_client">Клієнт SA-MP</string>
+    <string name="compat_client_missing">%1$s (%2$s) не встановлено</string>
+    <string name="compat_client_ok">%1$s v%2$s (%3$s)</string>
+    <string name="compat_launch">Запуск клієнта</string>
+    <string name="compat_direct_connect">Пряме підключення до сервера</string>
+    <string name="compat_direct_connect_detail">Клієнт не має документованого способу прийняти адресу сервера й нік від іншого застосунку. Лаунчер відкриває клієнт і копіює адресу в буфер обміну.</string>
+    <string name="compat_folder">Папка гри</string>
+    <string name="compat_manifest">Маніфест файлів</string>
+    <string name="compat_manifest_ok">%1$d файлів для перевірки</string>
+    <string name="section_what_to_install">Що потрібно встановити</string>
+    <string name="compat_requirements">1. Легально придбана GTA: San Andreas для Android.\n2. Сумісний Android-клієнт SA-MP (%1$s або інший), отриманий з офіційного джерела розробника клієнта.\n3. Ігрові дані клієнта у внутрішній пам’яті.\nПісля встановлення повернись сюди — перевірка оновиться автоматично.</string>
+
+    <!-- Діагностика -->
+    <string name="section_tools">Інструменти</string>
+    <string name="section_report">Звіт</string>
+    <string name="section_log">Журнал (%1$d)</string>
+    <string name="log_empty">Журнал порожній.</string>
+    <string name="msg_report_copied">Звіт скопійовано</string>
+
+    <!-- Налаштування -->
+    <string name="section_player">Гравець</string>
+    <string name="section_client">Ігровий клієнт</string>
+    <string name="section_launcher">Лаунчер</string>
+    <string name="section_server_config">Конфігурація сервера</string>
+    <string name="label_client_package">Назва пакета клієнта</string>
+    <string name="client_package_hint">За замовчуванням: %1$s</string>
+    <string name="toggle_copy_address">Копіювати адресу при запуску</string>
+    <string name="toggle_copy_address_hint">Адреса сервера потрапить у буфер обміну перед відкриттям клієнта</string>
+    <string name="toggle_check_updates">Перевіряти оновлення при старті</string>
+    <string name="toggle_check_updates_hint">Запит до update.url під час відкриття лаунчера</string>
+    <string name="label_server_name">Назва</string>
+    <string name="label_news_url">Новини</string>
+    <string name="label_update_url">Оновлення</string>
+    <string name="server_config_hint">Ці значення задаються у файлі bereza.properties під час збірки.</string>
+    <string name="msg_saved">Збережено</string>
+    <string name="msg_folder_forgotten">Доступ до папки відкликано</string>
+    <string name="err_package_name">Некоректна назва пакета (приклад: com.example.client)</string>
+
+    <!-- Про проєкт -->
+    <string name="about_tagline">Українська рольова гра у світі San Andreas Multiplayer</string>
+    <string name="section_about_launcher">Лаунчер</string>
+    <string name="label_client">Клієнт</string>
+    <string name="about_legal">Bereza RP Launcher — незалежний застосунок проєкту Bereza Role Play. Він не містить і не поширює файли GTA San Andreas, клієнти SA-MP чи інші захищені компоненти. Grand Theft Auto та San Andreas — торгові марки Rockstar Games / Take-Two Interactive. SA-MP — розробка SA-MP Team. Проєкт не пов’язаний із цими компаніями.</string>
+</resources>

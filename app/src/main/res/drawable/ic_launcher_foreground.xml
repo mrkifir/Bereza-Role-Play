@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Фірмовий знак Bereza RP: стовбур берези + зелений листок. Безпечна зона 66dp у центрі. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- стовбур -->
+    <path
+        android:fillColor="#FFF2F2EE"
+        android:pathData="M46.1,32.9a5.3,5.3 0,0 1,5.3 5.3v33a5.3,5.3 0,0 1,-10.6 0v-33a5.3,5.3 0,0 1,5.3 -5.3z" />
+    <!-- смуги кори -->
+    <path android:fillColor="#FF151A17" android:pathData="M40.8,40.8h6.3v2.3h-6.3z" />
+    <path android:fillColor="#FF151A17" android:pathData="M40.8,50.7h4.8v2.3h-4.8z" />
+    <path android:fillColor="#FF151A17" android:pathData="M40.8,60.6h7.4v2.3h-7.4z" />
+    <path android:fillColor="#FF151A17" android:pathData="M40.8,68.5h4.2v2.3h-4.2z" />
+    <!-- листок -->
+    <path
+        android:fillColor="#FF4CC38A"
+        android:pathData="M55.3,61.9C54,44.8 67.2,35.5 76.4,34.2C76.4,48.7 68.5,60.6 55.3,61.9z" />
+    <!-- прожилка -->
+    <path
+        android:strokeColor="#FF1E5C40"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M56,61.3L73.8,36.8" />
+</vector>
