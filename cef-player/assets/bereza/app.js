@@ -65,29 +65,43 @@
     // HUD приходить лише після входу - ховаємо екран входу
     show($("auth"), false);
     document.body.classList.remove("authmode");
-    show($("hud"), true);
-    $("hCash").textContent = money(p[0]);
+    show($("hud"), true); show($("idCard"), true);
+    $("hCash").textContent = money(p[0]).replace("$", "");
     $("hBank").textContent = money(p[1]);
     $("hLvl").textContent = p[2];
     show($("hVip"), p[3] === "1");
-    var eat = +p[4], str = Math.min(100, +p[5]), hp = Math.min(100, +p[6]), ar = Math.min(100, +p[7]), w = +p[8];
-    $("bEat").style.width = eat + "%";
+    var eat = Math.max(0, Math.min(100, +p[4])), hp = Math.max(0, Math.min(100, +p[6])), ar = Math.max(0, Math.min(100, +p[7])), w = +p[8];
+    $("bEat").style.width = eat + "%"; $("tEat").textContent = eat + "%";
     $("bEat").parentNode.parentNode.classList.toggle("low", eat < 25);
-    $("bStr").style.width = str + "%";
-    $("bHp").style.width = hp + "%";
-    $("bAr").style.width = ar + "%";
+    $("bHp").style.width = hp + "%"; $("tHp").textContent = hp + "%";
+    $("bAr").style.width = ar + "%"; $("tAr").textContent = ar + "%";
     show($("arRow"), ar > 0);
-    $("hTime").textContent = p[9];
+    var now = new Date(), dd = ("0" + now.getDate()).slice(-2) + "." + ("0" + (now.getMonth() + 1)).slice(-2) + "." + now.getFullYear();
+    $("hTime").textContent = dd + " " + p[9];
+    $("hName").textContent = p[10] || "";
     $("hId").textContent = p[11];
     var wl = $("hWanted");
     show(wl, w > 0);
     wl.textContent = w > 0 ? "★★★★★★".slice(0, w) : "";
     lastCash = +p[0];
     var wid = +p[12] || 0, ammo = +p[13] || 0;
-    show($("hWeap"), wid > 0);
-    if (wid > 0) { $("hWName").textContent = WEAP[wid] || ("Зброя " + wid); $("hAmmo").textContent = (wid >= 16 && wid <= 43 && wid !== 40) ? ammo : ""; }
+    $("hWIco").style.setProperty("--i", "url(img/" + weapIco(wid) + ".svg)");
+    $("hAmmo").textContent = (wid >= 16 && wid <= 43 && wid !== 40) ? ammo : "";
+    $("hWeap").title = WEAP[wid] || "Кулаки";
     gtaHud(false);
   });
+  function weapIco(w) {
+    if (!w) return "w_fist";
+    if (w === 4 || w === 8 || w === 9) return "w_knife";
+    if (w <= 15) return "w_melee";
+    if (w <= 18 || w === 39) return "w_grenade";
+    if (w <= 24) return "w_pistol";
+    if (w <= 27) return "w_shotgun";
+    if (w === 28 || w === 29 || w === 32) return "w_smg";
+    if (w === 30 || w === 31) return "w_rifle";
+    if (w === 33 || w === 34) return "w_sniper";
+    return "w_rifle";
+  }
   var WEAP = {1:"Кастет",2:"Ключка",3:"Кийок",4:"Ніж",5:"Біта",6:"Лопата",7:"Кий",8:"Катана",9:"Бензопила",10:"Дилдо",11:"Дилдо",12:"Вібратор",13:"Вібратор",14:"Квіти",15:"Тростина",
     16:"Граната",17:"Сльозогінний газ",18:"Коктейль Молотова",22:"Пістолет",23:"Пістолет з глушником",24:"Desert Eagle",25:"Дробовик",26:"Обріз",27:"Бойовий дробовик",28:"Micro Uzi",29:"MP5",
     30:"АК-47",31:"M4",32:"Tec-9",33:"Гвинтівка",34:"Снайперська гвинтівка",35:"РПГ",36:"Ракетниця",37:"Вогнемет",38:"Мініган",39:"Сумка C4",40:"Детонатор",41:"Балончик",42:"Вогнегасник",43:"Фотоапарат",44:"ПНБ",45:"Тепловізор",46:"Парашут"};
@@ -131,12 +145,13 @@
     $("spNum").classList.toggle("fast", v >= 160);
   }
   on("spdon", function (d) {
+    document.body.classList.add("driving");
     var p = d.split("|");
     $("spName").textContent = p[0];
     $("speedo").classList.toggle("bike", p[1] === "1");
     show($("speedo"), true);
   });
-  on("spdoff", function () { show($("speedo"), false); });
+  on("spdoff", function () { show($("speedo"), false); document.body.classList.remove("driving"); });
   on("spd", function (d) {
     var p = d.split("|").map(Number);
     show($("speedo"), true);
@@ -263,7 +278,7 @@
   $("pHome").addEventListener("click", function () { send("ph -1"); closePanels(true); });
 
   /* ---------------- інвентар ---------------- */
-  // [назва, картинка, вага кг, опис, можна викинути/передати]
+  // [назва, іконка, вага кг, опис, можна викинути/передати, колір]
   var ITEMS = [
     ["Смартфон", "phone", 0.2, "Дзвінки, SMS, банк, GPS і таксі. Відкрити також клавішею H.", 0, "#6FA8FF"],
     ["Паспорт", "passport", 0.05, "Документ громадянина. Показати іншому: /pass [id].", 0, "#6FA8FF"],
@@ -278,83 +293,108 @@
     ["Риба", "fish", 0.8, "Можна продати в магазині 24/7.", 1, "#4FD1C5"],
     ["Гроші", "money", 0, "Готівка в кишені. Передати: /pay [id] [сума].", 0, "#5BE38E"]
   ];
-  var MAXW = 30, SLOTS = 35, inv = null, tab = "all", selKey = null;
-  function gi(name, color) { return '<i class="gi" style="--i:url(img/' + name + '.svg)' + (color ? ";--c:" + color : "") + '"></i>'; }
-  function setGi(el, name, color) { el.style.setProperty("--i", "url(img/" + name + ".svg)"); el.style.setProperty("--c", color || "#9B7BFF"); }
+
+  var MAXW = 30, SLOTS = 42, inv = null, tab = "all", selKey = null;
+  function gi(name, extra) { return '<i class="gi" style="--i:url(img/' + name + '.svg)"></i>' + (extra || ""); }
+  function setGi(el, name) { el.style.setProperty("--i", "url(img/" + name + ".svg)"); }
   function cnt(i) { return inv ? (+inv[2 + i] || 0) : 0; }
+  function accOn() { return inv && inv[17] === "1"; }
+  function weight() { var w = 0; ITEMS.forEach(function (it, i) { if (i !== 11) w += it[2] * cnt(i); }); return w; }
   function cellsFor(t) {
     var out = [];
-    if (t === "all") ITEMS.forEach(function (it, i) { if (i !== 1 && i !== 2 && cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
+    if (t === "all") ITEMS.forEach(function (it, i) { if (cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
     else if (t === "docs") [1, 2].forEach(function (i) { if (cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
     else if (t === "wear") {
-      out.push({ k: "skin", img: "shirt", col: "#B79BFF", name: "Одяг (скін " + inv[14] + ")", desc: "Ваш поточний одяг. Змінити — у магазині одягу (/gps).", q: "" });
-      if (+inv[15]) out.push({ k: "hat", img: "cap", col: "#B79BFF", name: "Головний убір", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
-      if (+inv[16]) out.push({ k: "gl", img: "glasses", col: "#B79BFF", name: "Окуляри", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
+      out.push({ k: "skin", img: "shirt", name: "Одяг", desc: "Скін #" + inv[14] + ". Змінити — у магазині одягу (/gps).", q: "" });
+      if (+inv[15]) out.push({ k: "hat", img: "cap", name: "Головний убір", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: accOn() ? "вдягнуто" : "знято", acc: 1 });
+      if (+inv[16]) out.push({ k: "gl", img: "glasses", name: "Окуляри", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: accOn() ? "вдягнуто" : "знято", acc: 1 });
     } else {
-      out.push({ k: "cash", info: 1, img: "money", col: "#5BE38E", name: "Готівка", v: money(inv[0]) });
-      out.push({ k: "bank", info: 1, img: "lock", col: "#6FA8FF", name: "Банк", v: money(inv[1]) });
-      out.push({ k: "w", info: 1, img: "bag", name: "Вага речей", v: weight().toFixed(1) + " кг" });
+      out.push({ k: "cash", info: 1, img: "money", name: "Готівка", v: money(inv[0]) });
+      out.push({ k: "bank", info: 1, img: "lock", name: "Банк", v: money(inv[1]) });
+      out.push({ k: "w", info: 1, img: "bag", name: "Вага", v: weight().toFixed(1) + " кг" });
     }
     return out;
   }
-  function weight() { var w = 0; ITEMS.forEach(function (it, i) { if (i !== 11) w += it[2] * cnt(i); }); return w; }
+  function eqCell(img, on, label, act) {
+    return '<div class="eq' + (on ? "" : " off") + (act ? " click" : "") + '"' + (act ? ' data-act="' + act + '"' : "") + ">" + gi(img) + "<small>" + label + "</small></div>";
+  }
   function render() {
     var g = $("iGrid"), cells = cellsFor(tab);
     g.innerHTML = "";
-    if (selKey && !cells.some(function (c) { return c.k === selKey; })) selKey = null;
-    if (!selKey && cells.length && !cells[0].info) selKey = cells[0].k;
-    for (var n = 0; n < SLOTS; n++) {
-      var c = cells[n], b = document.createElement("button");
+    if (selKey && !cells.some(function (c) { return c.k === selKey; })) { selKey = null; closeMenu(); }
+    var n = Math.max(SLOTS, Math.ceil(cells.length / 7) * 7);
+    for (var k = 0; k < n; k++) {
+      var c = cells[k], b = document.createElement("button");
       if (!c) { b.className = "cell empty"; g.appendChild(b); continue; }
       if (c.info) {
         b.className = "cell info";
-        b.innerHTML = "<div><small>" + c.name + "</small><b>" + c.v + '</b></div>' + gi(c.img, c.col);
+        b.innerHTML = "<div><small>" + c.name + "</small><b>" + c.v + "</b></div>" + gi(c.img);
       } else {
         var img = c.i != null ? ITEMS[c.i][1] : c.img, q = c.i != null ? (c.i === 11 ? "" : cnt(c.i)) : "";
         b.className = "cell" + (c.k === selKey ? " sel" : "");
-        b.innerHTML = gi(img, c.i != null ? ITEMS[c.i][5] : c.col) + '<span class="q">' + q + "</span>";
-        b.style.setProperty("--cc", c.i != null ? ITEMS[c.i][5] : c.col);
-        (function (k) { b.addEventListener("click", function () { selKey = k; render(); }); b.addEventListener("dblclick", function () { selKey = k; doUse(); }); })(c.k);
+        b.innerHTML = gi(img) + '<span class="q">' + q + "</span>";
+        (function (cc, el) {
+          el.addEventListener("click", function (e) { e.stopPropagation(); selKey = cc.k; render(); openMenu(cc, $("iGrid").querySelector(".cell.sel")); });
+          el.addEventListener("dblclick", function () { selKey = cc.k; doUse(); });
+        })(c, b);
       }
       g.appendChild(b);
     }
-    var sel = cells.filter(function (c) { return c.k === selKey; })[0];
-    if (sel) {
-      var it = sel.i != null ? ITEMS[sel.i] : null;
-      setGi($("dImg"), it ? it[1] : sel.img, it ? it[5] : sel.col);
-      $("dName").textContent = it ? it[0] : sel.name;
-      $("dDesc").textContent = it ? it[3] : sel.desc;
-      $("dW").textContent = it ? (it[2] ? "Вага: " + (it[2] * cnt(sel.i)).toFixed(2).replace(/\.?0+$/, "") + " кг" : "") : "";
-      $("dQ").textContent = it ? (sel.i === 11 ? "Сума: " + money(cnt(11)) : "Кількість: " + cnt(sel.i) + " шт.") : (sel.q ? "Стан: " + sel.q : "");
-    } else {
-      setGi($("dImg"), "box", "#9B7BFF"); $("dName").textContent = tab === "more" ? "Додатково" : "Порожньо";
-      $("dDesc").textContent = tab === "more" ? "Гроші та вага ваших речей." : "Тут поки нічого немає."; $("dW").textContent = ""; $("dQ").textContent = "";
-    }
-    var canUse = !!sel && (sel.i != null ? sel.i !== 11 && sel.i !== 10 : !!sel.acc);
-    var canMove = !!sel && sel.i != null && ITEMS[sel.i][4] === 1;
-    $("aUse").disabled = !canUse; $("aDrop").disabled = !canMove; $("aGive").disabled = !canMove;
-    // ліва колонка: що вдягнуто
-    var wear = [["cap", +inv[15] && inv[17] === "1", 1], ["glasses", +inv[16] && inv[17] === "1", 1], ["shirt", 1, 0], ["jeans", 1, 0], ["shoe", 1, 0]];
-    $("iWear").innerHTML = wear.map(function (w) { return '<button class="wear' + (w[1] ? " on" : "") + (w[2] ? " click" : "") + '" data-acc="' + w[2] + '">' + gi(w[0]) + "</button>"; }).join("");
-    $("iWear").querySelectorAll(".wear.click").forEach(function (el) { el.addEventListener("click", function () { if (+inv[15] || +inv[16]) send("invacc"); }); });
+    var hat = +inv[15], gl = +inv[16];
+    $("iEqL").innerHTML = eqCell("cap", hat && accOn(), "Голова", hat ? "acc" : "") + eqCell("glasses", gl && accOn(), "Окуляри", gl ? "acc" : "") +
+      eqCell("shirt", 1, "Верх") + eqCell("jeans", 1, "Низ") + eqCell("shoe", 1, "Взуття");
+    $("iEqR").innerHTML = eqCell("phone", cnt(0) > 0, "Телефон", cnt(0) ? "u0" : "") + eqCell("passport", cnt(1) > 0, "Паспорт", cnt(1) ? "u1" : "") +
+      eqCell("lic", cnt(2) > 0, "Ліцензії", cnt(2) ? "u2" : "") + eqCell("rod", cnt(9) > 0, "Вудка") + eqCell("canister", cnt(7) > 0, "Каністра");
+    [$("iEqL"), $("iEqR")].forEach(function (col) {
+      col.querySelectorAll(".eq.click").forEach(function (el) {
+        el.addEventListener("click", function () {
+          var a = el.dataset.act;
+          if (a === "acc") send("invacc");
+          else { send("inv " + a.slice(1)); closePanels(true); }
+        });
+      });
+    });
     $("iSkin").textContent = "Скін #" + inv[14];
     $("iCash").textContent = money(inv[0]); $("iBank").textContent = money(inv[1]);
     var w = weight(); $("iW").textContent = w.toFixed(1); $("iWBar").style.width = Math.min(100, w / MAXW * 100) + "%";
   }
-  function selected() { var c = cellsFor(tab).filter(function (c) { return c.k === selKey; })[0]; return c || null; }
+  var menuFor = null;
+  function openMenu(c, el) {
+    menuFor = c;
+    var it = c.i != null ? ITEMS[c.i] : null, m = $("iMenu");
+    setGi($("mIco"), it ? it[1] : c.img);
+    $("mName").textContent = it ? it[0] : c.name;
+    $("mQ").textContent = it ? (c.i === 11 ? money(cnt(11)) : cnt(c.i) + " шт. · " + (it[2] * cnt(c.i)).toFixed(2).replace(/\.?0+$/, "") + " кг") : (c.q ? c.q : "");
+    $("mDesc").textContent = it ? it[3] : c.desc;
+    $("aUse").disabled = !(it ? c.i !== 11 && c.i !== 10 : !!c.acc);
+    $("aDrop").disabled = $("aGive").disabled = !(it && it[4] === 1);
+    show(m, true);
+    if (el) {
+      var r = el.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+      var x = r.right + 10, y = r.top;
+      if (x + mw > innerWidth - 10) x = r.left - mw - 10;
+      if (y + mh > innerHeight - 10) y = innerHeight - mh - 10;
+      m.style.left = x + "px"; m.style.top = y + "px";
+    }
+  }
+  function closeMenu() { menuFor = null; show($("iMenu"), false); }
+  $("iMenu").addEventListener("click", function (e) { e.stopPropagation(); });
+  $("inv").addEventListener("click", function () { if (menuFor) { closeMenu(); selKey = null; render(); } });
   function doUse() {
-    var s = selected(); if (!s) return;
-    if (s.acc) { send("invacc"); return; }
-    if (s.i == null || s.i === 11 || s.i === 10) return;
-    if (s.i <= 2) { send("inv " + s.i); closePanels(true); return; }   // телефон / документи - закриваємо інвентар
-    send("invuse " + s.i);
+    var c = menuFor || cellsFor(tab).filter(function (x) { return x.k === selKey; })[0];
+    if (!c) return;
+    if (c.acc) { send("invacc"); return; }
+    if (c.i == null || c.i === 11 || c.i === 10) return;
+    if (c.i <= 2) { send("inv " + c.i); closePanels(true); return; }   // телефон / документи - закриваємо інвентар
+    send("invuse " + c.i);
   }
   $("aUse").addEventListener("click", doUse);
-  $("aDrop").addEventListener("click", function () { var s = selected(); if (s && s.i != null) send("invdrop " + s.i); });
-  $("aGive").addEventListener("click", function () { var s = selected(); if (s && s.i != null) send("invgive " + s.i); });
+  $("aDrop").addEventListener("click", function () { if (menuFor && menuFor.i != null) send("invdrop " + menuFor.i); });
+  $("aGive").addEventListener("click", function () { if (menuFor && menuFor.i != null) send("invgive " + menuFor.i); });
   $("iTabs").querySelectorAll("button").forEach(function (b) {
-    b.addEventListener("click", function () {
-      tab = b.dataset.t; selKey = null;
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      tab = b.dataset.t; selKey = null; closeMenu();
       $("iTabs").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
       render();
     });
@@ -363,20 +403,24 @@
   function sendPreview() {
     var r = $("iChar").getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
     if (!r.width) return;
-    send("invpv " + Math.round(r.left / W * 6400) + " " + Math.round(r.top / H * 4480) + " " + Math.round(r.width / W * 6400) + " " + Math.round((r.height - r.height * 0.06) / H * 4480));
+    // «вікно» у фоні, щоб модель персонажа з гри було видно
+    var x = Math.round(r.left), y = Math.round(r.top), w = Math.round(r.width), h = Math.round(r.height);
+    $("inv").querySelector(".iv-bg").style.clipPath = 'path(evenodd, "M0 0 H' + W + ' V' + H + ' H0 Z M' + x + ' ' + y + ' h' + w + ' v' + h + ' h-' + w + ' Z")';
+    send("invpv " + Math.round(r.left / W * 6400) + " " + Math.round(r.top / H * 4480) + " " + Math.round(r.width / W * 6400) + " " + Math.round(r.height * 0.95 / H * 4480));
   }
   on("inv", function (d) {
     var wasOpen = !$("inv").classList.contains("hidden");
     inv = d.split("|");
-    if (!wasOpen) { closePanels(true); tab = "all"; selKey = null; $("iTabs").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.t === "all"); }); }
+    if (!wasOpen) { closePanels(true); tab = "all"; selKey = null; closeMenu(); $("iTabs").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.t === "all"); }); }
     show($("inv"), true);
     document.body.classList.add("inv-open");
     render();
+    if (menuFor) { var still = cellsFor(tab).filter(function (x) { return x.k === menuFor.k; })[0]; if (still) openMenu(still, $("iGrid").querySelector(".cell.sel")); else closeMenu(); }
     syncFocus();
     if (!wasOpen) requestAnimationFrame(function () { setTimeout(sendPreview, 260); });
   });
-  $("iX").addEventListener("click", function () { send("inv -1"); closePanels(true); });
-  $("iList").addEventListener("click", function () { send("inv 99"); closePanels(true); });
+  $("iX").addEventListener("click", function (e) { e.stopPropagation(); send("inv -1"); closePanels(true); });
+  $("iList").addEventListener("click", function (e) { e.stopPropagation(); send("inv 99"); closePanels(true); });
 
   /* ---------------- документи ---------------- */
   var docT;
@@ -404,7 +448,7 @@
   function f(k, v) { return '<div class="fld"><small>' + k + '</small><b>' + esc(v || "—") + '</b></div>'; }
   function row(k, ok, yes) { return '<div class="lic-row"><span>' + k + '</span><b class="' + (ok ? "ok" : "no") + '">' + (ok ? yes : "Немає") + '</b></div>'; }
 
-  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open"); show($("phone"), false); show($("inv"), false); unfocus(); }
+  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open"); if ($("iMenu")) show($("iMenu"), false); show($("phone"), false); show($("inv"), false); unfocus(); }
   on("panel", function () { closePanels(true); });
 
   /* ---------------- клавіатура ---------------- */
