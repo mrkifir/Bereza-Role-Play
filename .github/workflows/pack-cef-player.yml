@@ -27,7 +27,7 @@ jobs:
           rm -f package-manifest.json.bak
           mkdir -p cef/assets
           cp -r ../../cef-player/assets/* cef/assets/
-          cp ../../cef-player/ЧИТАЙ_МЕНЕ.txt .
+          cp ../../cef-player/README_UA.txt .
           unzip -q ../../dl/ual.zip -d ASI_Loader
           cd ..
           zip -qr9 BerezaRP-CEF.zip BerezaRP-CEF
@@ -38,4 +38,4 @@ jobs:
         run: |
           gh release delete cef-player -y --cleanup-tag -R ${{ github.repository }} || true
           gh release create cef-player out/BerezaRP-CEF.zip -R ${{ github.repository }} --target ${{ github.sha }} \
-            --title "Bereza RP — CEF для гравців (ПК)" --notes "Розпакувати в папку з GTA SA. Інструкція: ЧИТАЙ_МЕНЕ.txt"
+            --title "Bereza RP — CEF для гравців (ПК)" --notes "Розпакувати в папку з GTA SA. Інструкція: README_UA.txt"
