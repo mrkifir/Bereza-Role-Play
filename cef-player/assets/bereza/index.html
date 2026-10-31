@@ -114,16 +114,54 @@
 
 <!-- ===== Інвентар ===== -->
 <div id="inv" class="hidden">
-  <div class="inv-panel">
-    <div class="inv-head">
-      <div class="inv-title">Інвентар</div>
-      <div class="inv-money"><span id="iCash">$0</span><small>банк <b id="iBank">$0</b></small></div>
-      <button class="x" id="iX" aria-label="Закрити">×</button>
+  <div class="iv">
+    <div class="iv-top">
+      <div class="iv-logo">
+        <svg class="crown" viewBox="0 0 64 40"><path d="M4 34 L8 8 L22 22 L32 4 L42 22 L56 8 L60 34 Z"/><rect x="4" y="34" width="56" height="5" rx="2"/></svg>
+        <div><b>BEREZA</b><span>ROLE PLAY</span></div>
+      </div>
+      <div class="iv-title"><img src="img/bag.png" alt="">Інвентар</div>
+      <button class="iv-x" id="iX" aria-label="Закрити">×</button>
     </div>
-    <div class="inv-grid" id="iGrid"></div>
-    <div class="inv-foot">
-      <span class="hint">Натисніть на предмет, щоб використати</span>
-      <button class="btn ghost" id="iList">Список</button>
+    <div class="iv-panel">
+      <div class="iv-left">
+        <div class="iv-wear" id="iWear"></div>
+        <div class="iv-char" id="iChar"><div class="iv-skin" id="iSkin"></div></div>
+      </div>
+      <div class="iv-right">
+        <div class="iv-tabs" id="iTabs">
+          <button data-t="all" class="on"><img src="img/bag.png" alt="">Інвентар</button>
+          <button data-t="wear"><img src="img/shirt.png" alt="">Одяг</button>
+          <button data-t="docs"><img src="img/passport.png" alt="">Документи</button>
+          <button data-t="more"><span class="dots">•••</span>Додатково</button>
+        </div>
+        <div class="iv-grid" id="iGrid"></div>
+      </div>
+      <div class="iv-info">
+        <div class="iv-det" id="iDet">
+          <div class="iv-det-ico"><img id="dImg" src="img/box.png" alt=""></div>
+          <div class="iv-det-txt">
+            <b id="dName">Оберіть предмет</b>
+            <p id="dDesc">Натисніть на клітинку, щоб побачити опис.</p>
+            <div class="iv-det-meta"><span id="dW"></span><span id="dQ"></span></div>
+          </div>
+        </div>
+        <div class="iv-side">
+          <div class="iv-wallet">
+            <div><small>Готівка</small><b id="iCash">$0</b></div>
+            <div><small>Банк</small><b id="iBank">$0</b></div>
+          </div>
+          <div class="iv-acts">
+            <button class="act main" id="aUse"><img src="img/use.png" alt="">Використати</button>
+            <button class="act" id="aDrop"><img src="img/drop.png" alt="">Викинути</button>
+            <button class="act" id="aGive"><img src="img/give.png" alt="">Передати</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="iv-foot">
+      <div class="iv-weight"><img src="img/bag.png" alt=""><div><span>Вага: <b id="iW">0</b> / 30 кг</span><div class="wbar"><i id="iWBar"></i></div></div></div>
+      <div class="iv-hint"><span class="i">i</span><div><b>Інвентар відкритий</b><small>Натисніть ESC, щоб закрити · «Список» — <a id="iList">старе меню</a></small></div></div>
     </div>
   </div>
 </div>

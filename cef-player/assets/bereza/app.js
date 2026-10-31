@@ -263,25 +263,114 @@
   $("pHome").addEventListener("click", function () { send("ph -1"); closePanels(true); });
 
   /* ---------------- інвентар ---------------- */
+  // [назва, картинка, вага кг, опис, можна викинути/передати]
   var ITEMS = [
-    ["Смартфон", "📱"], ["Паспорт", "🪪"], ["Ліцензії", "📄"], ["Аптечки", "🩹"], ["Бинти", "🧻"], ["Їжа", "🍔"],
-    ["Сигарети", "🚬"], ["Каністра", "⛽"], ["Ремкомплект", "🧰"], ["Вудка", "🎣"], ["Риба", "🐟"], ["Гроші", "💵"]
+    ["Смартфон", "phone", 0.2, "Дзвінки, SMS, банк, GPS і таксі. Відкрити також клавішею H.", 0],
+    ["Паспорт", "passport", 0.05, "Документ громадянина. Показати іншому: /pass [id].", 0],
+    ["Ліцензії", "lic", 0.02, "Посвідчення водія та дозвіл на зброю. Показати: /lic [id].", 0],
+    ["Аптечка", "medkit", 0.5, "Відновлює здоров'я до 100.", 1],
+    ["Бинт", "bandage", 0.1, "Зупиняє кровотечу і трохи лікує.", 1],
+    ["Їжа", "food", 0.3, "Знімає голод.", 1],
+    ["Сигарети", "cig", 0.05, "Пачка сигарет. Шкодить здоров'ю.", 1],
+    ["Каністра", "canister", 5, "20 літрів пального. Використайте біля свого авто.", 1],
+    ["Ремкомплект", "repair", 2, "Швидкий ремонт авто прямо на дорозі.", 1],
+    ["Вудка", "rod", 1.2, "Рибалка на пірсі: ALT біля води.", 1],
+    ["Риба", "fish", 0.8, "Можна продати в магазині 24/7.", 1],
+    ["Гроші", "money", 0, "Готівка в кишені. Передати: /pay [id] [сума].", 0]
   ];
-  on("inv", function (d) {
-    var p = d.split("|");
-    closePanels(true);
-    $("iCash").textContent = money(p[0]); $("iBank").textContent = money(p[1]);
-    var g = $("iGrid"); g.innerHTML = "";
-    ITEMS.forEach(function (it, i) {
-      var c = +p[2 + i] || 0, b = document.createElement("button");
-      b.className = "slot" + (c > 0 ? "" : " empty");
-      var cnt = i === 11 ? money(c) : (c > 0 ? "×" + c : "");
-      b.innerHTML = '<span class="cnt">' + cnt + '</span><span class="emo">' + it[1] + '</span><span class="nm">' + it[0] + "</span>";
-      b.addEventListener("click", function () { if (c <= 0 && i !== 11) return; send("inv " + i); closePanels(true); });
+  var MAXW = 30, inv = null, tab = "all", selKey = null;
+  function cnt(i) { return inv ? (+inv[2 + i] || 0) : 0; }
+  function cellsFor(t) {
+    var out = [];
+    if (t === "all") ITEMS.forEach(function (it, i) { if (i !== 1 && i !== 2 && cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
+    else if (t === "docs") [1, 2].forEach(function (i) { if (cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
+    else if (t === "wear") {
+      out.push({ k: "skin", img: "shirt", name: "Одяг (скін " + inv[14] + ")", desc: "Ваш поточний одяг. Змінити — у магазині одягу (/gps).", q: "" });
+      if (+inv[15]) out.push({ k: "hat", img: "cap", name: "Головний убір", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
+      if (+inv[16]) out.push({ k: "gl", img: "glasses", name: "Окуляри", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
+    } else {
+      out.push({ k: "cash", info: 1, img: "money", name: "Готівка", v: money(inv[0]) });
+      out.push({ k: "bank", info: 1, img: "lock", name: "Банк", v: money(inv[1]) });
+      out.push({ k: "w", info: 1, img: "bag", name: "Вага речей", v: weight().toFixed(1) + " кг" });
+    }
+    return out;
+  }
+  function weight() { var w = 0; ITEMS.forEach(function (it, i) { if (i !== 11) w += it[2] * cnt(i); }); return w; }
+  function render() {
+    var g = $("iGrid"), cells = cellsFor(tab);
+    g.innerHTML = "";
+    if (selKey && !cells.some(function (c) { return c.k === selKey; })) selKey = null;
+    if (!selKey && cells.length && !cells[0].info) selKey = cells[0].k;
+    for (var n = 0; n < 15; n++) {
+      var c = cells[n], b = document.createElement("button");
+      if (!c) { b.className = "cell empty"; g.appendChild(b); continue; }
+      if (c.info) {
+        b.className = "cell info";
+        b.innerHTML = "<div><small>" + c.name + "</small><b>" + c.v + '</b></div><img src="img/' + c.img + '.png" alt="">';
+      } else {
+        var img = c.i != null ? ITEMS[c.i][1] : c.img, q = c.i != null ? (c.i === 11 ? "" : cnt(c.i)) : "";
+        b.className = "cell" + (c.k === selKey ? " sel" : "");
+        b.innerHTML = '<img src="img/' + img + '.png" alt=""><span class="q">' + q + "</span>";
+        (function (k) { b.addEventListener("click", function () { selKey = k; render(); }); b.addEventListener("dblclick", function () { selKey = k; doUse(); }); })(c.k);
+      }
       g.appendChild(b);
+    }
+    var sel = cells.filter(function (c) { return c.k === selKey; })[0];
+    if (sel) {
+      var it = sel.i != null ? ITEMS[sel.i] : null;
+      $("dImg").src = "img/" + (it ? it[1] : sel.img) + ".png";
+      $("dName").textContent = it ? it[0] : sel.name;
+      $("dDesc").textContent = it ? it[3] : sel.desc;
+      $("dW").textContent = it ? (it[2] ? "Вага: " + (it[2] * cnt(sel.i)).toFixed(2).replace(/\.?0+$/, "") + " кг" : "") : "";
+      $("dQ").textContent = it ? (sel.i === 11 ? "Сума: " + money(cnt(11)) : "Кількість: " + cnt(sel.i) + " шт.") : (sel.q ? "Стан: " + sel.q : "");
+    } else {
+      $("dImg").src = "img/box.png"; $("dName").textContent = tab === "more" ? "Додатково" : "Порожньо";
+      $("dDesc").textContent = tab === "more" ? "Гроші та вага ваших речей." : "Тут поки нічого немає."; $("dW").textContent = ""; $("dQ").textContent = "";
+    }
+    var canUse = !!sel && (sel.i != null ? sel.i !== 11 && sel.i !== 10 : !!sel.acc);
+    var canMove = !!sel && sel.i != null && ITEMS[sel.i][4] === 1;
+    $("aUse").disabled = !canUse; $("aDrop").disabled = !canMove; $("aGive").disabled = !canMove;
+    // ліва колонка: що вдягнуто
+    var wear = [["cap", +inv[15] && inv[17] === "1", 1], ["glasses", +inv[16] && inv[17] === "1", 1], ["shirt", 1, 0], ["jeans", 1, 0], ["shoe", 1, 0]];
+    $("iWear").innerHTML = wear.map(function (w) { return '<button class="wear' + (w[1] ? " on" : "") + (w[2] ? " click" : "") + '" data-acc="' + w[2] + '"><img src="img/' + w[0] + '.png" alt=""></button>'; }).join("");
+    $("iWear").querySelectorAll(".wear.click").forEach(function (el) { el.addEventListener("click", function () { if (+inv[15] || +inv[16]) send("invacc"); }); });
+    $("iSkin").textContent = "Скін #" + inv[14];
+    $("iCash").textContent = money(inv[0]); $("iBank").textContent = money(inv[1]);
+    var w = weight(); $("iW").textContent = w.toFixed(1); $("iWBar").style.width = Math.min(100, w / MAXW * 100) + "%";
+  }
+  function selected() { var c = cellsFor(tab).filter(function (c) { return c.k === selKey; })[0]; return c || null; }
+  function doUse() {
+    var s = selected(); if (!s) return;
+    if (s.acc) { send("invacc"); return; }
+    if (s.i == null || s.i === 11 || s.i === 10) return;
+    if (s.i <= 2) { send("inv " + s.i); closePanels(true); return; }   // телефон / документи - закриваємо інвентар
+    send("invuse " + s.i);
+  }
+  $("aUse").addEventListener("click", doUse);
+  $("aDrop").addEventListener("click", function () { var s = selected(); if (s && s.i != null) send("invdrop " + s.i); });
+  $("aGive").addEventListener("click", function () { var s = selected(); if (s && s.i != null) send("invgive " + s.i); });
+  $("iTabs").querySelectorAll("button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      tab = b.dataset.t; selKey = null;
+      $("iTabs").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+      render();
     });
+  });
+  // вікно персонажа: сервер малює модель скіна саме в цьому прямокутнику (координати 640x448)
+  function sendPreview() {
+    var r = $("iChar").getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
+    if (!r.width) return;
+    send("invpv " + Math.round(r.left / W * 6400) + " " + Math.round(r.top / H * 4480) + " " + Math.round(r.width / W * 6400) + " " + Math.round((r.height - r.height * 0.06) / H * 4480));
+  }
+  on("inv", function (d) {
+    var wasOpen = !$("inv").classList.contains("hidden");
+    inv = d.split("|");
+    if (!wasOpen) { closePanels(true); tab = "all"; selKey = null; $("iTabs").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.t === "all"); }); }
     show($("inv"), true);
+    document.body.classList.add("inv-open");
+    render();
     syncFocus();
+    if (!wasOpen) requestAnimationFrame(function () { setTimeout(sendPreview, 260); });
   });
   $("iX").addEventListener("click", function () { send("inv -1"); closePanels(true); });
   $("iList").addEventListener("click", function () { send("inv 99"); closePanels(true); });
@@ -312,7 +401,7 @@
   function f(k, v) { return '<div class="fld"><small>' + k + '</small><b>' + esc(v || "—") + '</b></div>'; }
   function row(k, ok, yes) { return '<div class="lic-row"><span>' + k + '</span><b class="' + (ok ? "ok" : "no") + '">' + (ok ? yes : "Немає") + '</b></div>'; }
 
-  function closePanels(silent) { document.body.classList.remove("phone-open"); show($("phone"), false); show($("inv"), false); unfocus(); }
+  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open"); show($("phone"), false); show($("inv"), false); unfocus(); }
   on("panel", function () { closePanels(true); });
 
   /* ---------------- клавіатура ---------------- */
