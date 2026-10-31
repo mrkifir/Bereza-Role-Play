@@ -205,3 +205,20 @@ body.authmode .dlg { width: 52vh; }
 /* перегляд у звичайному браузері (не в грі) */
 html.preview body { background: linear-gradient(160deg,#6b7f8f,#2c3a44); }
 body.phone-open #hud, body.phone-open #speedo { opacity: 0; transition: opacity .2s; }
+
+/* ---------------- документи ---------------- */
+#doc { position: fixed; left: 50%; top: 18vh; transform: translateX(-50%); width: 58vh; border-radius: 1.8vh; overflow: hidden; background: #F3EFE6; color: #1B1F27; box-shadow: var(--shadow); animation: pop .25s ease; }
+.doc-head { display: flex; align-items: baseline; justify-content: space-between; padding: 1.6vh 2vh 1.3vh; color: #fff; border-bottom: .45vh solid var(--yellow); }
+.doc-head.pass { background: #1F4FB6; } .doc-head.lic { background: #1E8E4E; }
+.doc-head b { font-family: "Unbounded", sans-serif; font-size: 2.2vh; letter-spacing: .04em; }
+.doc-head span { font-size: 1.2vh; font-weight: 800; letter-spacing: .12em; opacity: .85; }
+.doc-body { display: flex; gap: 2vh; padding: 2vh; }
+.doc-body.col { flex-direction: column; gap: 1.2vh; }
+.doc-photo { width: 11vh; height: 14vh; flex: none; border-radius: 1vh; display: grid; place-items: center; background: linear-gradient(160deg, #DCE3EE, #B9C4D6); font-family: "Unbounded", sans-serif; font-size: 3.6vh; color: #1F4FB6; }
+.doc-fields { flex: 1; display: flex; flex-direction: column; gap: 1vh; }
+.doc-fields.right { flex: none; text-align: right; }
+.fld small { display: block; color: #3F64C8; font-size: 1.1vh; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.fld b { font-size: 1.7vh; }
+.doc-mrz { padding: 0 2vh 1.8vh; font: 600 1.4vh monospace; color: #6B7280; letter-spacing: .12em; white-space: nowrap; overflow: hidden; }
+.lic-row { display: flex; justify-content: space-between; padding: 1.1vh 1.4vh; border-radius: 1vh; background: rgba(0, 0, 0, .05); font-weight: 700; font-size: 1.6vh; }
+.lic-row .ok { color: #1E8E4E; } .lic-row .no { color: #C62828; }

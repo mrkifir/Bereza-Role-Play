@@ -10,7 +10,12 @@
     emit: function () { console.log("emit", [].slice.call(arguments).join(" ")); }
   };
   if (!live) { document.documentElement.classList.add("preview"); window.__fire = function (n, d) { (handlers[n] || []).forEach(function (f) { f(d); }); }; }
-  function unfocus() { if (live && bridge.set_focus && !dlg && $("phone").classList.contains("hidden") && $("inv").classList.contains("hidden")) bridge.set_focus(false); }
+  // фокус (курсор + клавіатура) — тримаємо, поки відкрито діалог, телефон або інвентар
+  function syncFocus() {
+    var want = !!dlg || !$("phone").classList.contains("hidden") || !$("inv").classList.contains("hidden");
+    if (live && bridge.set_focus) bridge.set_focus(want);
+  }
+  var unfocus = syncFocus;
 
   function send(s) { bridge.emit("br", s); }
   function show(el, on) { el.classList.toggle("hidden", !on); }
@@ -155,6 +160,7 @@
       select(0);
     }
     show($("dlgWrap"), true);
+    syncFocus();
     if (input) setTimeout(function () { $("dIn").focus(); }, 30);
   });
   function makeRow(text, i, head) {
@@ -225,6 +231,7 @@
     $("pName").textContent = p[2]; $("pNum").textContent = p[3] && p[3] !== "0" ? p[3] : "—"; $("pBank").textContent = money(p[5]);
     show($("phone"), true);
     document.body.classList.add("phone-open");
+    syncFocus();
   });
   $("pHome").addEventListener("click", function () { send("ph -1"); closePanels(true); });
 
@@ -247,9 +254,36 @@
       g.appendChild(b);
     });
     show($("inv"), true);
+    syncFocus();
   });
   $("iX").addEventListener("click", function () { send("inv -1"); closePanels(true); });
   $("iList").addEventListener("click", function () { send("inv 99"); closePanels(true); });
+
+  /* ---------------- документи ---------------- */
+  var docT;
+  on("doc", function (d) {
+    var p = d.split("|"), el = $("doc"), h = "";
+    if (p[0] === "pass") {
+      // pass|ім'я|стать|вік|робота|фракція|номер|рівень|NICK
+      var ini = p[1].split(" ").map(function (w) { return w.charAt(0); }).join("").slice(0, 2);
+      h = '<div class="doc-head pass"><b>УКРАЇНА</b><span>ПАСПОРТ ГРОМАДЯНИНА</span></div>' +
+        '<div class="doc-body"><div class="doc-photo">' + esc(ini) + '</div><div class="doc-fields">' +
+        f("Ім'я", p[1]) + f("Стать / вік", p[2] + ", " + p[3]) + f("Робота", p[4]) + f("Організація", p[5]) +
+        '</div><div class="doc-fields right">' + f("Номер", "UA " + p[6]) + f("У штаті", p[7] + " р.") + '</div></div>' +
+        '<div class="doc-mrz">P&lt;UKR' + esc(p[8].toUpperCase()).replace(/_/g, "&lt;") + '&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>';
+    } else {
+      // lic|ім'я|водій 0/1|зброя 0/1
+      h = '<div class="doc-head lic"><b>ЛІЦЕНЗІЇ</b><span>МВС УКРАЇНИ</span></div>' +
+        '<div class="doc-body col"><div class="doc-fields">' + f("Власник", p[1]) + '</div>' +
+        row("Посвідчення водія (B)", p[2] === "1", "Дійсне") + row("Дозвіл на зброю", p[3] === "1", "Дійсний") + '</div>';
+    }
+    el.innerHTML = h;
+    show(el, true);
+    clearTimeout(docT);
+    docT = setTimeout(function () { show(el, false); }, 12000);
+  });
+  function f(k, v) { return '<div class="fld"><small>' + k + '</small><b>' + esc(v || "—") + '</b></div>'; }
+  function row(k, ok, yes) { return '<div class="lic-row"><span>' + k + '</span><b class="' + (ok ? "ok" : "no") + '">' + (ok ? yes : "Немає") + '</b></div>'; }
 
   function closePanels(silent) { document.body.classList.remove("phone-open"); show($("phone"), false); show($("inv"), false); unfocus(); }
   on("panel", function () { closePanels(true); });

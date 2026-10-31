@@ -31,11 +31,12 @@ jobs:
           unzip -q ../../dl/ual.zip -d ASI_Loader
           cd ..
           zip -qr9 BerezaRP-CEF.zip BerezaRP-CEF
+          cd BerezaRP-CEF && zip -qr9 ../BerezaRP-CEF-UI.zip cef/assets && cd ..
           ls -la
       - name: Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete cef-player -y --cleanup-tag -R ${{ github.repository }} || true
-          gh release create cef-player out/BerezaRP-CEF.zip -R ${{ github.repository }} --target ${{ github.sha }} \
+          gh release create cef-player out/BerezaRP-CEF.zip out/BerezaRP-CEF-UI.zip -R ${{ github.repository }} --target ${{ github.sha }} \
             --title "Bereza RP — CEF для гравців (ПК)" --notes "Розпакувати в папку з GTA SA. Інструкція: README_UA.txt"
