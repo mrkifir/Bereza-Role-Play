@@ -60,7 +60,7 @@ jobs:
 
   server_linux:
     runs-on: ubuntu-latest
-    container: debian:11
+    container: debian:12
     steps:
       - name: Deps
         run: |
