@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Bereza RP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="off">
+
+<!-- ===== Екран входу ===== -->
+<div id="auth" class="hidden">
+  <div class="auth-bg"></div>
+  <div class="auth-brand">
+    <div class="logo">BEREZA<span>RP</span></div>
+    <div class="auth-sub">українська рольова гра</div>
+  </div>
+</div>
+
+<!-- ===== HUD ===== -->
+<div id="hud" class="hidden">
+  <div class="hud-money">
+    <div class="cash" id="hCash">$0</div>
+    <div class="bank"><i class="ic ic-bank"></i><span id="hBank">$0</span></div>
+    <div id="hDelta"></div>
+  </div>
+  <div class="hud-row">
+    <div class="pill lvl"><span id="hLvl">1</span><small>рівень</small></div>
+    <div class="pill vip hidden" id="hVip">VIP</div>
+    <div class="pill id">ID <b id="hId">0</b></div>
+    <div class="pill time" id="hTime">00:00</div>
+  </div>
+  <div class="hud-bars">
+    <div class="bar hp"><i class="ic ic-heart"></i><div class="track"><div class="fill" id="bHp"></div></div></div>
+    <div class="bar ar hidden" id="arRow"><i class="ic ic-shield"></i><div class="track"><div class="fill" id="bAr"></div></div></div>
+    <div class="bar eat"><i class="ic ic-food"></i><div class="track"><div class="fill" id="bEat"></div></div></div>
+    <div class="bar str"><i class="ic ic-arm"></i><div class="track"><div class="fill" id="bStr"></div></div></div>
+  </div>
+  <div class="wanted hidden" id="hWanted"></div>
+</div>
+
+<!-- ===== Спідометр ===== -->
+<div id="speedo" class="hidden">
+  <svg viewBox="0 0 200 200" class="gauge">
+    <defs>
+      <linearGradient id="gArc" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#2F6FED"/>
+        <stop offset=".65" stop-color="#FFD60A"/>
+        <stop offset="1" stop-color="#E5484D"/>
+      </linearGradient>
+    </defs>
+    <path class="arc-bg" d="M 38 162 A 80 80 0 1 1 162 162"/>
+    <path class="arc" id="spArc" d="M 38 162 A 80 80 0 1 1 162 162" stroke="url(#gArc)"/>
+    <g id="spTicks"></g>
+  </svg>
+  <div class="sp-center">
+    <div class="sp-num" id="spNum">0</div>
+    <div class="sp-unit">км/год</div>
+    <div class="sp-name" id="spName">—</div>
+  </div>
+  <div class="sp-side">
+    <div class="sp-gauge"><i class="ic ic-fuel"></i><div class="vtrack"><div class="vfill" id="spFuel"></div></div></div>
+    <div class="sp-gauge"><i class="ic ic-wrench"></i><div class="vtrack"><div class="vfill hpfill" id="spHp"></div></div></div>
+  </div>
+  <div class="sp-icons">
+    <i class="ic ic-engine" id="sEng" title="Двигун"></i>
+    <i class="ic ic-light" id="sLig" title="Фари"></i>
+    <i class="ic ic-lock" id="sLock" title="Замок"></i>
+    <i class="ic ic-belt" id="sBelt" title="Пасок"></i>
+  </div>
+</div>
+
+<!-- ===== Діалог ===== -->
+<div id="dlgWrap" class="hidden">
+  <div class="dlg" id="dlg">
+    <div class="dlg-head"><div class="dlg-title" id="dTitle"></div><button class="x" id="dX" aria-label="Закрити">×</button></div>
+    <div class="dlg-body" id="dBody"></div>
+    <div class="dlg-list hidden" id="dList"></div>
+    <div class="dlg-input hidden" id="dInWrap">
+      <input id="dIn" type="text" maxlength="127" autocomplete="off" spellcheck="false">
+      <button class="eye hidden" id="dEye" type="button" aria-label="Показати пароль"><i class="ic ic-eye"></i></button>
+    </div>
+    <div class="dlg-btns">
+      <button class="btn ghost" id="dB2"></button>
+      <button class="btn primary" id="dB1"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Телефон ===== -->
+<div id="phone" class="hidden">
+  <div class="ph-frame">
+    <div class="ph-screen">
+      <div class="ph-status"><span id="pTime">00:00</span><span class="ph-notch"></span><span class="ph-net">LTE <i class="ic ic-bat"></i></span></div>
+      <div class="ph-clock" id="pClock">00:00</div>
+      <div class="ph-date" id="pDate">01.01.2026</div>
+      <div class="ph-card">
+        <div><small>Власник</small><b id="pName">—</b></div>
+        <div><small>Номер</small><b id="pNum">—</b></div>
+        <div><small>Рахунок</small><b id="pBank">$0</b></div>
+      </div>
+      <div class="ph-grid" id="pGrid"></div>
+      <button class="ph-home" id="pHome" aria-label="Закрити"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Інвентар ===== -->
+<div id="inv" class="hidden">
+  <div class="inv-panel">
+    <div class="inv-head">
+      <div class="inv-title">Інвентар</div>
+      <div class="inv-money"><span id="iCash">$0</span><small>банк <b id="iBank">$0</b></small></div>
+      <button class="x" id="iX" aria-label="Закрити">×</button>
+    </div>
+    <div class="inv-grid" id="iGrid"></div>
+    <div class="inv-foot">
+      <span class="hint">Натисніть на предмет, щоб використати</span>
+      <button class="btn ghost" id="iList">Список</button>
+    </div>
+  </div>
+</div>
+
+<div id="doc" class="hidden"></div>
+
+<div id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
