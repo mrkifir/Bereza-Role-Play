@@ -1,0 +1,41 @@
+name: Pack CEF player bundle
+
+on:
+  push:
+    branches: [ cef-build ]
+    paths: [ 'cef-player/**', '.github/workflows/pack-cef-player.yml' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          gh release download cef-v1 -R ${{ github.repository }} -p cef-client.zip -D dl
+          curl -sSL -o dl/ual.zip https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/latest/download/Ultimate-ASI-Loader.zip
+          mkdir -p out/BerezaRP-CEF/ASI_Loader
+          cd out/BerezaRP-CEF
+          unzip -q ../../dl/cef-client.zip
+          rm -f package-manifest.json.bak
+          mkdir -p cef/assets
+          cp -r ../../cef-player/assets/* cef/assets/
+          cp ../../cef-player/ЧИТАЙ_МЕНЕ.txt .
+          unzip -q ../../dl/ual.zip -d ASI_Loader
+          cd ..
+          zip -qr9 BerezaRP-CEF.zip BerezaRP-CEF
+          ls -la
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete cef-player -y --cleanup-tag -R ${{ github.repository }} || true
+          gh release create cef-player out/BerezaRP-CEF.zip -R ${{ github.repository }} --target ${{ github.sha }} \
+            --title "Bereza RP — CEF для гравців (ПК)" --notes "Розпакувати в папку з GTA SA. Інструкція: ЧИТАЙ_МЕНЕ.txt"
