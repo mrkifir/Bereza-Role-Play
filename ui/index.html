@@ -19,32 +19,32 @@
 
 <!-- ===== HUD ===== -->
 <div id="hud" class="hidden">
-  <div class="hud-money">
-    <div class="cash" id="hCash">$0</div>
-    <div class="bank"><i class="ic ic-bank"></i><span id="hBank">$0</span></div>
-    <div id="hDelta"></div>
+  <div class="h-top">
+    <div class="h-bars">
+      <div class="h-bar hp"><i class="ic ic-heart"></i><b id="tHp">100%</b><div class="track"><div class="fill" id="bHp"></div></div></div>
+      <div class="h-bar ar hidden" id="arRow"><i class="ic ic-shield"></i><b id="tAr">0%</b><div class="track"><div class="fill" id="bAr"></div></div></div>
+      <div class="h-bar eat"><i class="ic ic-food"></i><b id="tEat">100%</b><div class="track"><div class="fill" id="bEat"></div></div></div>
+    </div>
+    <div class="h-weap" id="hWeap"><i class="gi" id="hWIco" style="--i:url(img/w_fist.svg)"></i><b id="hAmmo"></b></div>
   </div>
-  <div class="hud-row">
-    <div class="pill lvl"><span id="hLvl">1</span><small>рівень</small></div>
-    <div class="pill vip hidden" id="hVip">VIP</div>
-    <div class="pill id">ID <b id="hId">0</b></div>
-    <div class="pill time" id="hTime">00:00</div>
+  <div class="h-money"><span id="hCash">0</span><i>$</i><div id="hDelta"></div></div>
+  <div class="h-bank">банк <b id="hBank">$0</b></div>
+  <div class="h-wanted hidden" id="hWanted"></div>
+</div>
+
+<div id="idCard" class="hidden">
+  <div class="id-logo">B<span>RP</span></div>
+  <div class="id-txt">
+    <div class="id-row"><b class="id-badge">ID: <span id="hId">0</span></b><b class="id-lvl">LVL <span id="hLvl">1</span></b><b class="id-vip hidden" id="hVip">VIP</b></div>
+    <div class="id-name" id="hName">—</div>
+    <div class="id-time" id="hTime">00:00</div>
   </div>
-  <div class="hud-bars">
-    <div class="bar hp"><i class="ic ic-heart"></i><div class="track"><div class="fill" id="bHp"></div></div></div>
-    <div class="bar ar hidden" id="arRow"><i class="ic ic-shield"></i><div class="track"><div class="fill" id="bAr"></div></div></div>
-    <div class="bar eat"><i class="ic ic-food"></i><div class="track"><div class="fill" id="bEat"></div></div></div>
-    <div class="bar str"><i class="ic ic-arm"></i><div class="track"><div class="fill" id="bStr"></div></div></div>
-  </div>
-  <div class="weap hidden" id="hWeap"><span id="hWName"></span><b id="hAmmo"></b></div>
-  <div class="wanted hidden" id="hWanted"></div>
 </div>
 
 <!-- ===== Чипи: GPS, зелена зона, робоча зміна ===== -->
-<div id="chipGz" class="chip gz hidden"><i class="dot"></i>Зелена зона</div>
+<div id="chipGz" class="chip gz hidden">Зелена зона</div>
 <div id="chipGps" class="chip gps hidden"><i class="ic ic-pin"></i><span id="chipGpsT"></span></div>
 <div id="chipShift" class="chip shift hidden"><i class="ic ic-wrench"></i><div><b id="chipShiftJ"></b><small id="chipShiftN"></small></div></div>
-<div id="brand">BEREZA <span>RP</span></div>
 
 <!-- ===== Спідометр ===== -->
 <div id="speedo" class="hidden">
@@ -114,55 +114,33 @@
 
 <!-- ===== Інвентар ===== -->
 <div id="inv" class="hidden">
-  <div class="iv">
-    <div class="iv-top">
-      <div class="iv-logo">
-        <svg class="crown" viewBox="0 0 64 40"><path d="M4 34 L8 8 L22 22 L32 4 L42 22 L56 8 L60 34 Z"/><rect x="4" y="34" width="56" height="5" rx="2"/></svg>
-        <div><b>BEREZA</b><span>ROLE PLAY</span></div>
-      </div>
-      <div class="iv-title"><i class="gi" style="--i:url(img/bag.svg)"></i>Інвентар</div>
-      <button class="iv-x" id="iX" aria-label="Закрити">×</button>
+  <div class="iv-bg"></div>
+  <div class="iv-l">
+    <div class="iv-head"><button class="iv-x" id="iX" aria-label="Закрити"></button><h1>Інвентар</h1></div>
+    <div class="iv-body">
+      <div class="iv-eq" id="iEqL"></div>
+      <div class="iv-char" id="iChar"><div class="iv-skin" id="iSkin"></div></div>
+      <div class="iv-eq" id="iEqR"></div>
     </div>
-    <div class="iv-panel">
-      <div class="iv-left">
-        <div class="iv-wear" id="iWear"></div>
-        <div class="iv-char" id="iChar"><div class="iv-skin" id="iSkin"></div></div>
-      </div>
-      <div class="iv-right">
-        <div class="iv-tabs" id="iTabs">
-          <button data-t="all" class="on"><i class="gi" style="--i:url(img/bag.svg)"></i>Інвентар</button>
-          <button data-t="wear"><i class="gi" style="--i:url(img/shirt.svg)"></i>Одяг</button>
-          <button data-t="docs"><i class="gi" style="--i:url(img/passport.svg)"></i>Документи</button>
-          <button data-t="more"><span class="dots">•••</span>Додатково</button>
-        </div>
-        <div class="iv-grid" id="iGrid"></div>
-      </div>
-      <div class="iv-info">
-        <div class="iv-det" id="iDet">
-          <div class="iv-det-ico"><i id="dImg" class="gi" style="--i:url(img/box.svg)"></i></div>
-          <div class="iv-det-txt">
-            <b id="dName">Оберіть предмет</b>
-            <p id="dDesc">Натисніть на клітинку, щоб побачити опис.</p>
-            <div class="iv-det-meta"><span id="dW"></span><span id="dQ"></span></div>
-          </div>
-        </div>
-        <div class="iv-side">
-          <div class="iv-wallet">
-            <div><small>Готівка</small><b id="iCash">$0</b></div>
-            <div><small>Банк</small><b id="iBank">$0</b></div>
-          </div>
-          <div class="iv-acts">
-            <button class="act main" id="aUse"><i class="gi" style="--i:url(img/use.svg)"></i>Використати</button>
-            <button class="act" id="aDrop"><i class="gi" style="--i:url(img/drop.svg)"></i>Викинути</button>
-            <button class="act" id="aGive"><i class="gi" style="--i:url(img/give.svg)"></i>Передати</button>
-          </div>
-        </div>
-      </div>
+    <div class="iv-stats">
+      <div><small>Готівка</small><b id="iCash">$0</b></div>
+      <div><small>Банк</small><b id="iBank">$0</b></div>
+      <div class="w"><small>Вага речей</small><b><span id="iW">0</span> / 30 кг</b><div class="wbar"><i id="iWBar"></i></div></div>
     </div>
-    <div class="iv-foot">
-      <div class="iv-weight"><i class="gi" style="--i:url(img/bag.svg)"></i><div><span>Вага: <b id="iW">0</b> / 30 кг</span><div class="wbar"><i id="iWBar"></i></div></div></div>
-      <div class="iv-hint"><span class="i">i</span><div><b>Інвентар відкритий</b><small>Натисніть ESC, щоб закрити · «Список» — <a id="iList">старе меню</a></small></div></div>
+  </div>
+  <div class="iv-sep"></div>
+  <div class="iv-r">
+    <div class="iv-cap">Ваші речі <span>(натисніть на предмет, щоб взаємодіяти)</span></div>
+    <div class="iv-tabs" id="iTabs">
+      <button data-t="all" class="on">Усе</button><button data-t="wear">Одяг</button><button data-t="docs">Документи</button><button data-t="more">Додатково</button>
     </div>
+    <div class="iv-box"><div class="iv-grid" id="iGrid"></div></div>
+    <div class="iv-hint">ESC — закрити · <a id="iList">старе меню</a></div>
+  </div>
+  <div class="iv-menu hidden" id="iMenu">
+    <div class="m-head"><i class="gi" id="mIco"></i><div><b id="mName"></b><small id="mQ"></small></div></div>
+    <p id="mDesc"></p>
+    <button id="aUse">Використати</button><button id="aDrop">Викинути</button><button id="aGive">Передати</button>
   </div>
 </div>
 
