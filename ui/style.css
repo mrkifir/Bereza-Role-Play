@@ -300,3 +300,33 @@ body.authmode #brand, body.authmode .chip { display: none; }
 .iv-char { z-index: 0; }
 .iv-wear, .iv-right, .iv-info { position: relative; z-index: 1; }
 body.inv-open #hud, body.inv-open #speedo, body.inv-open .chip, body.inv-open #brand { opacity: 0; }
+
+/* іконки предметів (game-icons.net, CC BY 3.0): гліф із градієнтом «метал» + кольоровий відблиск */
+.gi { display: inline-block; flex: none; width: 1em; height: 1em; --c: #9B7BFF;
+  background: linear-gradient(165deg, #FFFFFF 0%, #E4E0F0 38%, color-mix(in srgb, var(--c) 70%, #fff) 100%);
+  -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat;
+  filter: drop-shadow(0 .35vh .5vh rgba(0, 0, 0, .55)); }
+.iv-title .gi { font-size: 3.2vh; }
+.iv-tabs .gi { font-size: 2.6vh; }
+.iv-tabs button.on .gi { background: #fff; }
+.wear .gi { font-size: 4.4vh; opacity: .35; background: #8C86A3; }
+.wear.on .gi { opacity: 1; background: linear-gradient(165deg, #fff, #C8B6FF); }
+.cell { overflow: hidden; }
+.cell::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--cc, transparent) 22%, transparent), transparent 62%); pointer-events: none; }
+.cell .gi { font-size: 5.6vh; }
+.cell.info .gi { position: absolute; right: 1vh; bottom: 1vh; font-size: 3.6vh; opacity: .9; }
+.iv-det-ico .gi { font-size: 10vh; }
+.act .gi { font-size: 2.8vh; }
+.act.main .gi { background: #fff; }
+.iv-weight .gi { font-size: 3.6vh; }
+/* більше слотів: 7 x 5 */
+.iv-grid { grid-template-columns: repeat(7, 1fr); grid-auto-rows: 9.4vh; gap: 1vh; }
+.cell .q { font-size: 1.6vh; right: .8vh; bottom: .5vh; }
+.iv-tabs button { height: 5.2vh; }
+.iv-title, .iv-x { height: 5.4vh; }
+.iv-x { width: 5.4vh; }
+.iv-det { min-height: 16vh; padding: 1.4vh 2vh; }
+.iv-det-ico { width: 12vh; height: 12vh; }
+.act { height: 6.6vh; }
+.iv-foot { margin-top: 1.2vh; }
+.iv-weight, .iv-hint { padding: 1.2vh 2vh; }

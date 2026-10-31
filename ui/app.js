@@ -265,32 +265,34 @@
   /* ---------------- інвентар ---------------- */
   // [назва, картинка, вага кг, опис, можна викинути/передати]
   var ITEMS = [
-    ["Смартфон", "phone", 0.2, "Дзвінки, SMS, банк, GPS і таксі. Відкрити також клавішею H.", 0],
-    ["Паспорт", "passport", 0.05, "Документ громадянина. Показати іншому: /pass [id].", 0],
-    ["Ліцензії", "lic", 0.02, "Посвідчення водія та дозвіл на зброю. Показати: /lic [id].", 0],
-    ["Аптечка", "medkit", 0.5, "Відновлює здоров'я до 100.", 1],
-    ["Бинт", "bandage", 0.1, "Зупиняє кровотечу і трохи лікує.", 1],
-    ["Їжа", "food", 0.3, "Знімає голод.", 1],
-    ["Сигарети", "cig", 0.05, "Пачка сигарет. Шкодить здоров'ю.", 1],
-    ["Каністра", "canister", 5, "20 літрів пального. Використайте біля свого авто.", 1],
-    ["Ремкомплект", "repair", 2, "Швидкий ремонт авто прямо на дорозі.", 1],
-    ["Вудка", "rod", 1.2, "Рибалка на пірсі: ALT біля води.", 1],
-    ["Риба", "fish", 0.8, "Можна продати в магазині 24/7.", 1],
-    ["Гроші", "money", 0, "Готівка в кишені. Передати: /pay [id] [сума].", 0]
+    ["Смартфон", "phone", 0.2, "Дзвінки, SMS, банк, GPS і таксі. Відкрити також клавішею H.", 0, "#6FA8FF"],
+    ["Паспорт", "passport", 0.05, "Документ громадянина. Показати іншому: /pass [id].", 0, "#6FA8FF"],
+    ["Ліцензії", "lic", 0.02, "Посвідчення водія та дозвіл на зброю. Показати: /lic [id].", 0, "#6FA8FF"],
+    ["Аптечка", "medkit", 0.5, "Відновлює здоров'я до 100.", 1, "#FF5A6A"],
+    ["Бинт", "bandage", 0.1, "Зупиняє кровотечу і трохи лікує.", 1, "#FF8A95"],
+    ["Їжа", "food", 0.3, "Знімає голод.", 1, "#FFB547"],
+    ["Сигарети", "cig", 0.05, "Пачка сигарет. Шкодить здоров'ю.", 1, "#C9B79C"],
+    ["Каністра", "canister", 5, "20 літрів пального. Використайте біля свого авто.", 1, "#FF6B3D"],
+    ["Ремкомплект", "repair", 2, "Швидкий ремонт авто прямо на дорозі.", 1, "#FFC94D"],
+    ["Вудка", "rod", 1.2, "Рибалка на пірсі: ALT біля води.", 1, "#4FD1C5"],
+    ["Риба", "fish", 0.8, "Можна продати в магазині 24/7.", 1, "#4FD1C5"],
+    ["Гроші", "money", 0, "Готівка в кишені. Передати: /pay [id] [сума].", 0, "#5BE38E"]
   ];
-  var MAXW = 30, inv = null, tab = "all", selKey = null;
+  var MAXW = 30, SLOTS = 35, inv = null, tab = "all", selKey = null;
+  function gi(name, color) { return '<i class="gi" style="--i:url(img/' + name + '.svg)' + (color ? ";--c:" + color : "") + '"></i>'; }
+  function setGi(el, name, color) { el.style.setProperty("--i", "url(img/" + name + ".svg)"); el.style.setProperty("--c", color || "#9B7BFF"); }
   function cnt(i) { return inv ? (+inv[2 + i] || 0) : 0; }
   function cellsFor(t) {
     var out = [];
     if (t === "all") ITEMS.forEach(function (it, i) { if (i !== 1 && i !== 2 && cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
     else if (t === "docs") [1, 2].forEach(function (i) { if (cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
     else if (t === "wear") {
-      out.push({ k: "skin", img: "shirt", name: "Одяг (скін " + inv[14] + ")", desc: "Ваш поточний одяг. Змінити — у магазині одягу (/gps).", q: "" });
-      if (+inv[15]) out.push({ k: "hat", img: "cap", name: "Головний убір", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
-      if (+inv[16]) out.push({ k: "gl", img: "glasses", name: "Окуляри", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
+      out.push({ k: "skin", img: "shirt", col: "#B79BFF", name: "Одяг (скін " + inv[14] + ")", desc: "Ваш поточний одяг. Змінити — у магазині одягу (/gps).", q: "" });
+      if (+inv[15]) out.push({ k: "hat", img: "cap", col: "#B79BFF", name: "Головний убір", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
+      if (+inv[16]) out.push({ k: "gl", img: "glasses", col: "#B79BFF", name: "Окуляри", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: inv[17] === "1" ? "вдягнуто" : "знято", acc: 1 });
     } else {
-      out.push({ k: "cash", info: 1, img: "money", name: "Готівка", v: money(inv[0]) });
-      out.push({ k: "bank", info: 1, img: "lock", name: "Банк", v: money(inv[1]) });
+      out.push({ k: "cash", info: 1, img: "money", col: "#5BE38E", name: "Готівка", v: money(inv[0]) });
+      out.push({ k: "bank", info: 1, img: "lock", col: "#6FA8FF", name: "Банк", v: money(inv[1]) });
       out.push({ k: "w", info: 1, img: "bag", name: "Вага речей", v: weight().toFixed(1) + " кг" });
     }
     return out;
@@ -301,16 +303,17 @@
     g.innerHTML = "";
     if (selKey && !cells.some(function (c) { return c.k === selKey; })) selKey = null;
     if (!selKey && cells.length && !cells[0].info) selKey = cells[0].k;
-    for (var n = 0; n < 15; n++) {
+    for (var n = 0; n < SLOTS; n++) {
       var c = cells[n], b = document.createElement("button");
       if (!c) { b.className = "cell empty"; g.appendChild(b); continue; }
       if (c.info) {
         b.className = "cell info";
-        b.innerHTML = "<div><small>" + c.name + "</small><b>" + c.v + '</b></div><img src="img/' + c.img + '.png" alt="">';
+        b.innerHTML = "<div><small>" + c.name + "</small><b>" + c.v + '</b></div>' + gi(c.img, c.col);
       } else {
         var img = c.i != null ? ITEMS[c.i][1] : c.img, q = c.i != null ? (c.i === 11 ? "" : cnt(c.i)) : "";
         b.className = "cell" + (c.k === selKey ? " sel" : "");
-        b.innerHTML = '<img src="img/' + img + '.png" alt=""><span class="q">' + q + "</span>";
+        b.innerHTML = gi(img, c.i != null ? ITEMS[c.i][5] : c.col) + '<span class="q">' + q + "</span>";
+        b.style.setProperty("--cc", c.i != null ? ITEMS[c.i][5] : c.col);
         (function (k) { b.addEventListener("click", function () { selKey = k; render(); }); b.addEventListener("dblclick", function () { selKey = k; doUse(); }); })(c.k);
       }
       g.appendChild(b);
@@ -318,13 +321,13 @@
     var sel = cells.filter(function (c) { return c.k === selKey; })[0];
     if (sel) {
       var it = sel.i != null ? ITEMS[sel.i] : null;
-      $("dImg").src = "img/" + (it ? it[1] : sel.img) + ".png";
+      setGi($("dImg"), it ? it[1] : sel.img, it ? it[5] : sel.col);
       $("dName").textContent = it ? it[0] : sel.name;
       $("dDesc").textContent = it ? it[3] : sel.desc;
       $("dW").textContent = it ? (it[2] ? "Вага: " + (it[2] * cnt(sel.i)).toFixed(2).replace(/\.?0+$/, "") + " кг" : "") : "";
       $("dQ").textContent = it ? (sel.i === 11 ? "Сума: " + money(cnt(11)) : "Кількість: " + cnt(sel.i) + " шт.") : (sel.q ? "Стан: " + sel.q : "");
     } else {
-      $("dImg").src = "img/box.png"; $("dName").textContent = tab === "more" ? "Додатково" : "Порожньо";
+      setGi($("dImg"), "box", "#9B7BFF"); $("dName").textContent = tab === "more" ? "Додатково" : "Порожньо";
       $("dDesc").textContent = tab === "more" ? "Гроші та вага ваших речей." : "Тут поки нічого немає."; $("dW").textContent = ""; $("dQ").textContent = "";
     }
     var canUse = !!sel && (sel.i != null ? sel.i !== 11 && sel.i !== 10 : !!sel.acc);
@@ -332,7 +335,7 @@
     $("aUse").disabled = !canUse; $("aDrop").disabled = !canMove; $("aGive").disabled = !canMove;
     // ліва колонка: що вдягнуто
     var wear = [["cap", +inv[15] && inv[17] === "1", 1], ["glasses", +inv[16] && inv[17] === "1", 1], ["shirt", 1, 0], ["jeans", 1, 0], ["shoe", 1, 0]];
-    $("iWear").innerHTML = wear.map(function (w) { return '<button class="wear' + (w[1] ? " on" : "") + (w[2] ? " click" : "") + '" data-acc="' + w[2] + '"><img src="img/' + w[0] + '.png" alt=""></button>'; }).join("");
+    $("iWear").innerHTML = wear.map(function (w) { return '<button class="wear' + (w[1] ? " on" : "") + (w[2] ? " click" : "") + '" data-acc="' + w[2] + '">' + gi(w[0]) + "</button>"; }).join("");
     $("iWear").querySelectorAll(".wear.click").forEach(function (el) { el.addEventListener("click", function () { if (+inv[15] || +inv[16]) send("invacc"); }); });
     $("iSkin").textContent = "Скін #" + inv[14];
     $("iCash").textContent = money(inv[0]); $("iBank").textContent = money(inv[1]);
