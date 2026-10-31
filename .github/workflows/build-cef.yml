@@ -1,0 +1,102 @@
+name: Build CEF (samp-cef)
+
+on:
+  push:
+    branches: [ cef-build ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CEF_REPO: Pycckue-Bnepeg/samp-cef
+  CEF_REF: f14fe4fa7f0d036edf445ba02b4bddd4cccac377
+  CARGO_TERM_COLOR: always
+
+jobs:
+  client_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CEF_REPO }}
+          ref: ${{ env.CEF_REF }}
+      - name: Configuration
+        run: |
+          Write-Output "DX_SDK_DIR=${env:TEMP}/dxsdk" >> ${env:GITHUB_ENV}
+          Write-Output "DX_SDK=${env:TEMP}/dxsdk/Lib/x86" >> ${env:GITHUB_ENV}
+          Write-Output "CEF_PATH=${env:TEMP}/cef" >> ${env:GITHUB_ENV}
+      - name: Install DirectX SDK
+        run: |
+          curl -L https://download.microsoft.com/download/a/e/7/ae743f1f-632b-4809-87a9-aa1bb3458e31/DXSDK_Jun10.exe -o _DX2010_.exe
+          7z x _DX2010_.exe DXSDK/Lib/x86 -o_DX2010_
+          mv _DX2010_/DXSDK $DX_SDK_DIR
+          rm -fR _DX*_ _DX*_.exe
+        shell: bash
+      - name: Download CEF distribution
+        run: node scripts/download-cef.mjs --output "$CEF_PATH"
+        shell: bash
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: i686-pc-windows-msvc
+      - name: Build client + windows server plugin
+        run: cargo build --release --target i686-pc-windows-msvc
+        shell: bash
+      - name: Package
+        run: |
+          node scripts/package-client.mjs --cef "$CEF_PATH" --output redist
+          cd redist
+          7z a -tzip ../cef-client.zip cef.asi cef package-manifest.json
+          cd ..
+          cp target/i686-pc-windows-msvc/release/cef_server.dll cef-server-windows.dll
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win
+          path: |
+            cef-client.zip
+            cef-server-windows.dll
+
+  server_linux:
+    runs-on: ubuntu-latest
+    container: debian:11
+    steps:
+      - name: Deps
+        run: |
+          dpkg --add-architecture i386
+          apt-get update
+          apt-get install -y build-essential ca-certificates cmake curl git make g++-multilib
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: i686-unknown-linux-gnu
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CEF_REPO }}
+          ref: ${{ env.CEF_REF }}
+      - name: Build SA-MP plugin
+        run: |
+          cargo build --package cef-server --release --target i686-unknown-linux-gnu
+          strip -s target/i686-unknown-linux-gnu/release/libcef_server.so -o cef-server-linux.so
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: cef-server-linux.so
+
+  release:
+    needs: [ client_windows, server_linux ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ls -la out
+          gh release delete cef-v1 -y --cleanup-tag -R ${{ github.repository }} || true
+          gh release create cef-v1 out/* -R ${{ github.repository }} --target ${{ github.sha }} \
+            --title "samp-cef build" --notes "Built from ${{ env.CEF_REPO }}@${{ env.CEF_REF }} (GPL-3.0)"
