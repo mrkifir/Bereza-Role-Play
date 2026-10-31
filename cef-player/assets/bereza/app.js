@@ -39,8 +39,16 @@
   /* ---------------- стан ---------------- */
   var on = function (name, fn) { bridge.on(name, function (d) { try { fn(d == null ? "" : String(d)); } catch (e) { console.error(e); } }); };
 
+  // стандартний HUD GTA (гроші, зброя, здоров'я, годинник, зірки, назви) — ховаємо, бо є свій
+  var gtaHidden = null;
+  function gtaHud(visible) {
+    if (!live || gtaHidden === !visible) return;
+    gtaHidden = !visible;
+    ["interface", "vehicle_name", "area_name"].forEach(function (c) { bridge.emit("game:hud:setComponentVisible", c, visible); });
+  }
   on("reset", function (d) {
     document.body.classList.toggle("off", d !== "1");
+    gtaHud(d !== "1");
     if (d !== "1") { closeDialog(); closePanels(); }
   });
   on("auth", function (d) {
@@ -75,6 +83,22 @@
     show(wl, w > 0);
     wl.textContent = w > 0 ? "★★★★★★".slice(0, w) : "";
     lastCash = +p[0];
+    var wid = +p[12] || 0, ammo = +p[13] || 0;
+    show($("hWeap"), wid > 0);
+    if (wid > 0) { $("hWName").textContent = WEAP[wid] || ("Зброя " + wid); $("hAmmo").textContent = (wid >= 16 && wid <= 43 && wid !== 40) ? ammo : ""; }
+    gtaHud(false);
+  });
+  var WEAP = {1:"Кастет",2:"Ключка",3:"Кийок",4:"Ніж",5:"Біта",6:"Лопата",7:"Кий",8:"Катана",9:"Бензопила",10:"Дилдо",11:"Дилдо",12:"Вібратор",13:"Вібратор",14:"Квіти",15:"Тростина",
+    16:"Граната",17:"Сльозогінний газ",18:"Коктейль Молотова",22:"Пістолет",23:"Пістолет з глушником",24:"Desert Eagle",25:"Дробовик",26:"Обріз",27:"Бойовий дробовик",28:"Micro Uzi",29:"MP5",
+    30:"АК-47",31:"M4",32:"Tec-9",33:"Гвинтівка",34:"Снайперська гвинтівка",35:"РПГ",36:"Ракетниця",37:"Вогнемет",38:"Мініган",39:"Сумка C4",40:"Детонатор",41:"Балончик",42:"Вогнегасник",43:"Фотоапарат",44:"ПНБ",45:"Тепловізор",46:"Парашут"};
+
+  /* ---------------- чипи ---------------- */
+  // chip|k|on|текст   k: 0 GPS, 1 зміна, 2 зелена зона
+  on("chip", function (d) {
+    var p = d.split("|"), k = +p[0], vis = p[1] === "1", t = p.slice(2).join("|");
+    if (k === 0) { show($("chipGps"), vis); if (vis && t) $("chipGpsT").textContent = t; }
+    else if (k === 1) { show($("chipShift"), vis); if (vis && t) { var q = t.split("~"); $("chipShiftJ").textContent = q[0]; $("chipShiftN").textContent = q[1] || ""; } }
+    else show($("chipGz"), vis);
   });
   var deltaT;
   on("money", function (d) {
