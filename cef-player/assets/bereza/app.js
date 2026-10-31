@@ -209,7 +209,12 @@
     var row = document.createElement("div");
     row.className = "row" + (head ? " head" : "");
     var cols = text.split("\t");
-    cols.forEach(function (c) { var s = document.createElement("div"); s.className = "cell"; s.innerHTML = samp(c); row.appendChild(s); });
+    cols.forEach(function (c, k) {
+      var s = document.createElement("div"); s.className = "dcol";
+      // звичайний список: нумерація [1], [2] ... (якщо пункт ще не має номера)
+      var num = (!head && k === 0 && dlg && dlg.style === 2 && !/^\s*(\{[0-9a-fA-F]{6}\})?\s*\[/.test(c)) ? '<span class="num">[' + (i + 1) + ']</span> ' : "";
+      s.innerHTML = num + samp(c); row.appendChild(s);
+    });
     if (!head) {
       row.dataset.i = i;
       row.addEventListener("click", function () { select(i); });

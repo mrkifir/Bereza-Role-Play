@@ -147,8 +147,8 @@ body.authmode .dlg { width: 52vh; }
 .dlg-list .row:hover { background: rgba(255, 255, 255, .06); }
 .dlg-list .row.sel { background: rgba(255, 214, 10, .14); box-shadow: inset .35vh 0 0 var(--yellow); }
 .dlg-list .row.head { cursor: default; min-height: 3.4vh; color: var(--muted); font-size: 1.3vh; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: none !important; box-shadow: none; }
-.dlg-list .cell { flex: 1 1 0; min-width: 0; }
-.dlg-list .cell:first-child { flex: 1.6 1 0; }
+.dlg-list .dcol { flex: 1 1 0; min-width: 0; }
+.dlg-list .dcol:first-child { flex: 1.6 1 0; }
 .dlg-input { position: relative; margin: 0 2.2vh 1.6vh; }
 .dlg-input input { width: 100%; height: 5.4vh; padding: 0 5vh 0 1.8vh; border-radius: 1.1vh; border: 1px solid var(--line); background: rgba(255, 255, 255, .05); color: var(--text); font: 600 1.8vh "Manrope", sans-serif; outline: none; transition: border .15s, background .15s; }
 .dlg-input input:focus { border-color: var(--yellow); background: rgba(255, 255, 255, .08); }
@@ -327,3 +327,30 @@ body.phone-open #idCard, body.inv-open #hud, body.inv-open #speedo, body.inv-ope
 .iv-menu button:hover:not(:disabled) { background: #3A3A40; }
 .iv-menu button#aUse { background: var(--yellow); color: #151515; }
 .iv-menu button:disabled { display: none; }
+
+/* ================= ДІАЛОГИ v3 (картки, жовтий вибір) ================= */
+#dlgWrap { background: rgba(0, 0, 0, .18); }
+.dlg { width: 66vh; background: rgba(36, 36, 40, .97); border: 0; border-radius: 1.6vh; box-shadow: 0 2vh 6vh rgba(0, 0, 0, .55); }
+.dlg.wide { width: 90vh; }
+.dlg-head { justify-content: center; padding: 2.6vh 6vh 1.8vh; position: relative; }
+.dlg-head::before { display: none; }
+.dlg-title { flex: none; text-align: center; font-family: "Manrope", sans-serif; font-weight: 800; font-size: 3.2vh; color: #FFC21A; }
+.dlg-head .x { position: absolute; right: 1.8vh; top: 2.2vh; }
+.dlg-body { padding: 0 3.6vh 2vh; font-size: 1.85vh; font-weight: 600; color: #E8E8EC; }
+.dlg-list { margin: 0 2.4vh 1.6vh 3.6vh; padding: 0 1.4vh 0 0; background: none; border-radius: 0; max-height: 58vh; }
+.dlg-list::-webkit-scrollbar { width: .7vh; } .dlg-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, .06); border-radius: .4vh; }
+.dlg-list::-webkit-scrollbar-thumb { background: #FFC21A; border-radius: .4vh; }
+.dlg-list .row { min-height: 6.4vh; margin-bottom: 1vh; padding: 1vh 1.8vh; border-radius: 1vh; background: #1C1C20; font-size: 2vh; font-weight: 700; color: #F2F2F4; box-shadow: none; }
+.dlg-list .row:hover { background: #26262B; }
+.dlg-list .row .num { color: #FFB020; }
+.dlg-list .row.sel { background: #FFC21A; color: #1A1A1A; box-shadow: 0 .4vh 1.4vh rgba(255, 194, 26, .3); }
+.dlg-list .row.sel .num, .dlg-list .row.sel span { color: #1A1A1A !important; }
+.dlg-list .row.head { min-height: 3.6vh; margin-bottom: .4vh; color: #9A9AA3; font-size: 1.45vh; }
+.dlg-input { margin: 0 3.6vh 2vh; }
+.dlg-input input { height: 6vh; border-radius: 1vh; border: 0; background: #1C1C20; font-size: 2vh; }
+.dlg-input input:focus { box-shadow: inset 0 0 0 .2vh #FFC21A; background: #1C1C20; }
+.dlg-btns { justify-content: center; gap: 2vh; padding: .6vh 2.2vh 3vh; border-top: 0; }
+.dlg-btns .btn { min-width: 17vh; height: 5.8vh; border-radius: .9vh; font-family: "Manrope", sans-serif; font-size: 2.1vh; font-weight: 800; }
+#dB1 { order: 0; background: #FFC21A; color: #1A1A1A; } #dB2 { order: 1; background: #E5484D; color: #fff; }
+#dB1:hover, #dB2:hover { filter: brightness(1.08); }
+body.authmode #dlgWrap { background: none; }
