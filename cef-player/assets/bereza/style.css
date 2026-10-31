@@ -333,8 +333,7 @@ body.phone-open #idCard, body.inv-open #hud, body.inv-open #speedo, body.inv-ope
 .dlg { width: 64vh; background: linear-gradient(180deg, rgba(16, 24, 44, .97), rgba(11, 16, 30, .97)); border: 1px solid rgba(120, 150, 255, .14); border-radius: 1.2vh; box-shadow: 0 2vh 6vh rgba(0, 0, 0, .55); }
 .dlg.wide { width: 88vh; }
 .dlg-head { justify-content: flex-start; gap: 1.4vh; padding: 2vh 2.2vh 1.6vh; border-bottom: 1px solid rgba(120, 150, 255, .12); position: relative; }
-.dlg-head::before { display: block; content: ""; width: 3.6vh; height: 3.6vh; flex: none; border-radius: .9vh;
-  background: linear-gradient(180deg, #2F6FED 50%, #FFD60A 50%); box-shadow: 0 .4vh 1vh rgba(47, 111, 237, .35); }
+.dlg-head::before { display: none; }
 .dlg-title { flex: 1; text-align: left; font-family: "Oswald", sans-serif; font-weight: 600; font-size: 2.6vh; letter-spacing: .03em; text-transform: uppercase; color: #fff; }
 .dlg-head .x { position: static; }
 .dlg-body { padding: 1.8vh 2.6vh 1.6vh; font-size: 1.8vh; font-weight: 600; color: #DCE3F2; }
