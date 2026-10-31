@@ -3,6 +3,7 @@ name: Build CEF (samp-cef)
 on:
   push:
     branches: [ cef-build ]
+    paths: [ '.github/workflows/build-cef.yml' ]
   workflow_dispatch:
 
 permissions:
