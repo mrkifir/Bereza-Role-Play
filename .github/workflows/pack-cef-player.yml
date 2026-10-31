@@ -36,7 +36,7 @@ jobs:
           unzip -q ../../dl/ual.zip -d ASI_Loader
           cd ..
           zip -qr9 BerezaRP-CEF.zip BerezaRP-CEF
-          cd BerezaRP-CEF && zip -qr9 ../BerezaRP-CEF-UI.zip cef/assets && cd ..
+          cd BerezaRP-CEF && zip -qr9 ../BerezaRP-CEF-UI.zip cef/assets cef/plugins && cd ..
           ls -la
       - name: Publish
         env:
