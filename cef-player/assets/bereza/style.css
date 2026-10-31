@@ -328,29 +328,31 @@ body.phone-open #idCard, body.inv-open #hud, body.inv-open #speedo, body.inv-ope
 .iv-menu button#aUse { background: var(--yellow); color: #151515; }
 .iv-menu button:disabled { display: none; }
 
-/* ================= ДІАЛОГИ v3 (картки, жовтий вибір) ================= */
-#dlgWrap { background: rgba(0, 0, 0, .18); }
-.dlg { width: 66vh; background: rgba(36, 36, 40, .97); border: 0; border-radius: 1.6vh; box-shadow: 0 2vh 6vh rgba(0, 0, 0, .55); }
-.dlg.wide { width: 90vh; }
-.dlg-head { justify-content: center; padding: 2.6vh 6vh 1.8vh; position: relative; }
-.dlg-head::before { display: none; }
-.dlg-title { flex: none; text-align: center; font-family: "Manrope", sans-serif; font-weight: 800; font-size: 3.2vh; color: #FFC21A; }
-.dlg-head .x { position: absolute; right: 1.8vh; top: 2.2vh; }
-.dlg-body { padding: 0 3.6vh 2vh; font-size: 1.85vh; font-weight: 600; color: #E8E8EC; }
-.dlg-list { margin: 0 2.4vh 1.6vh 3.6vh; padding: 0 1.4vh 0 0; background: none; border-radius: 0; max-height: 58vh; }
-.dlg-list::-webkit-scrollbar { width: .7vh; } .dlg-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, .06); border-radius: .4vh; }
-.dlg-list::-webkit-scrollbar-thumb { background: #FFC21A; border-radius: .4vh; }
-.dlg-list .row { min-height: 6.4vh; margin-bottom: 1vh; padding: 1vh 1.8vh; border-radius: 1vh; background: #1C1C20; font-size: 2vh; font-weight: 700; color: #F2F2F4; box-shadow: none; }
-.dlg-list .row:hover { background: #26262B; }
-.dlg-list .row .num { color: #FFB020; }
-.dlg-list .row.sel { background: #FFC21A; color: #1A1A1A; box-shadow: 0 .4vh 1.4vh rgba(255, 194, 26, .3); }
-.dlg-list .row.sel .num, .dlg-list .row.sel span { color: #1A1A1A !important; }
-.dlg-list .row.head { min-height: 3.6vh; margin-bottom: .4vh; color: #9A9AA3; font-size: 1.45vh; }
-.dlg-input { margin: 0 3.6vh 2vh; }
-.dlg-input input { height: 6vh; border-radius: 1vh; border: 0; background: #1C1C20; font-size: 2vh; }
-.dlg-input input:focus { box-shadow: inset 0 0 0 .2vh #FFC21A; background: #1C1C20; }
-.dlg-btns { justify-content: center; gap: 2vh; padding: .6vh 2.2vh 3vh; border-top: 0; }
-.dlg-btns .btn { min-width: 17vh; height: 5.8vh; border-radius: .9vh; font-family: "Manrope", sans-serif; font-size: 2.1vh; font-weight: 800; }
-#dB1 { order: 0; background: #FFC21A; color: #1A1A1A; } #dB2 { order: 1; background: #E5484D; color: #fff; }
-#dB1:hover, #dB2:hover { filter: brightness(1.08); }
+/* ================= ДІАЛОГИ v4 — власний стиль Bereza (синьо-жовтий) ================= */
+#dlgWrap { background: radial-gradient(80vh 60vh at 50% 50%, rgba(10, 18, 40, .35), rgba(0, 0, 0, .15)); }
+.dlg { width: 64vh; background: linear-gradient(180deg, rgba(16, 24, 44, .97), rgba(11, 16, 30, .97)); border: 1px solid rgba(120, 150, 255, .14); border-radius: 1.2vh; box-shadow: 0 2vh 6vh rgba(0, 0, 0, .55); }
+.dlg.wide { width: 88vh; }
+.dlg-head { justify-content: flex-start; gap: 1.4vh; padding: 2vh 2.2vh 1.6vh; border-bottom: 1px solid rgba(120, 150, 255, .12); position: relative; }
+.dlg-head::before { display: block; content: ""; width: 3.6vh; height: 3.6vh; flex: none; border-radius: .9vh;
+  background: linear-gradient(180deg, #2F6FED 50%, #FFD60A 50%); box-shadow: 0 .4vh 1vh rgba(47, 111, 237, .35); }
+.dlg-title { flex: 1; text-align: left; font-family: "Oswald", sans-serif; font-weight: 600; font-size: 2.6vh; letter-spacing: .03em; text-transform: uppercase; color: #fff; }
+.dlg-head .x { position: static; }
+.dlg-body { padding: 1.8vh 2.6vh 1.6vh; font-size: 1.8vh; font-weight: 600; color: #DCE3F2; }
+.dlg-list { margin: 1.2vh 1.2vh 1.2vh 1.6vh; padding: 0 .8vh 0 0; background: none; max-height: 58vh; }
+.dlg-list::-webkit-scrollbar { width: .45vh; } .dlg-list::-webkit-scrollbar-track { background: transparent; }
+.dlg-list::-webkit-scrollbar-thumb { background: rgba(120, 150, 255, .5); border-radius: .3vh; }
+.dlg-list .row { min-height: 5.4vh; margin: 0; padding: .9vh 1.2vh; gap: 1.4vh; border-radius: .8vh; background: transparent; border-bottom: 1px solid rgba(255, 255, 255, .05); font-size: 1.85vh; font-weight: 600; color: #E8EDF8; box-shadow: none; transition: background .12s, transform .12s; }
+.dlg-list .row:hover { background: rgba(120, 150, 255, .08); }
+.dlg-list .row .num { display: inline-grid; place-items: center; min-width: 3.2vh; height: 3.2vh; margin-right: .6vh; padding: 0 .6vh; border-radius: .7vh; background: rgba(120, 150, 255, .14); color: #FFD60A; font-family: "Oswald", sans-serif; font-size: 1.7vh; font-weight: 600; }
+.dlg-list .row.sel { background: linear-gradient(90deg, rgba(47, 111, 237, .55), rgba(47, 111, 237, .12)); box-shadow: inset .4vh 0 0 #FFD60A; border-bottom-color: transparent; }
+.dlg-list .row.sel .num { background: #FFD60A; color: #0E1630; }
+.dlg-list .row.head { min-height: 3.2vh; border-bottom: 1px solid rgba(120, 150, 255, .2); color: #8EA0C8; font-family: "Oswald", sans-serif; font-size: 1.5vh; font-weight: 500; letter-spacing: .08em; }
+.dlg-input { margin: 0 2.6vh 1.8vh; }
+.dlg-input input { height: 5.6vh; border-radius: .8vh; border: 1px solid rgba(120, 150, 255, .2); background: rgba(5, 10, 22, .6); font-size: 1.9vh; }
+.dlg-input input:focus { border-color: #2F6FED; box-shadow: 0 0 0 .3vh rgba(47, 111, 237, .25); background: rgba(5, 10, 22, .8); }
+.dlg-btns { justify-content: flex-end; gap: 1.2vh; padding: 1.4vh 2.2vh 2vh; border-top: 1px solid rgba(120, 150, 255, .12); }
+.dlg-btns .btn { min-width: 15vh; height: 5vh; border-radius: 2.5vh; font-family: "Oswald", sans-serif; font-size: 1.9vh; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; }
+#dB1 { order: 1; background: linear-gradient(180deg, #3B7BFF, #2A5FD6); color: #fff; box-shadow: 0 .5vh 1.4vh rgba(47, 111, 237, .4); }
+#dB2 { order: 0; background: transparent; color: #C7D0E6; box-shadow: inset 0 0 0 1px rgba(199, 208, 230, .35); }
+#dB1:hover { filter: brightness(1.1); } #dB2:hover { color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .7); }
 body.authmode #dlgWrap { background: none; }
