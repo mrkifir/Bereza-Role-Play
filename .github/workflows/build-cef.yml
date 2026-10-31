@@ -51,6 +51,7 @@ jobs:
           7z a -tzip ../cef-client.zip cef.asi cef package-manifest.json
           cd ..
           cp target/i686-pc-windows-msvc/release/cef_server.dll cef-server-windows.dll
+          cp target/i686-pc-windows-msvc/release/cef_interface.dll cef-interface.dll
         shell: bash
       - uses: actions/upload-artifact@v4
         with:
@@ -58,6 +59,7 @@ jobs:
           path: |
             cef-client.zip
             cef-server-windows.dll
+            cef-interface.dll
 
   server_linux:
     runs-on: ubuntu-latest
