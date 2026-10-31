@@ -54,7 +54,10 @@
   var lastCash = null;
   on("hud", function (d) {
     var p = d.split("|");
-    show($("hud"), $("auth").classList.contains("hidden"));
+    // HUD приходить лише після входу - ховаємо екран входу
+    show($("auth"), false);
+    document.body.classList.remove("authmode");
+    show($("hud"), true);
     $("hCash").textContent = money(p[0]);
     $("hBank").textContent = money(p[1]);
     $("hLvl").textContent = p[2];
