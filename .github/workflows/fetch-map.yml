@@ -1,0 +1,23 @@
+name: Fetch map data (Kherson)
+on:
+  push:
+    branches: [ map-data ]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch OSM + textures
+        run: python3 tools/fetch_map.py out && ls -la out out/tex
+      - name: Pack
+        run: cd out && zip -qr ../kherson_src.zip . && cd .. && ls -la kherson_src.zip
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete map-src -y --cleanup-tag -R ${{ github.repository }} || true
+          gh release create map-src kherson_src.zip -R ${{ github.repository }} --target ${{ github.sha }} --title "Kherson map sources" \
+            --notes "OpenStreetMap data (c) OpenStreetMap contributors, ODbL. Textures: ambientCG.com, CC0."
