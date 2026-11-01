@@ -489,16 +489,17 @@
     $("bpTrack").innerHTML = h;
     var tk = p[11].split(";"), th = "", fl = +p[12], ph = "";
     $("bpBz").textContent = p[13] || 0;
+    var doneN = 0, doneP = 0;
     tk.forEach(function (x, k) {
       var q = x.split("~"), done = q[3] === "1", pc = Math.min(100, q[1] / q[2] * 100), pm = q[4] === "1";
       var row = '<div class="bp-task' + (done ? " done" : "") + (pm && !prem ? " lock" : "") + '"><span>' + esc(q[0]) + '</span><b>' + (done ? "Виконано" : (pm && !prem) ? "Преміум" : q[1] + " / " + q[2]) + '</b><div class="bp-bar"><i style="width:' + pc + '%"></i></div></div>';
-      if (pm) ph += row; else th += row;
+      if (pm) { ph += row; if (done) doneP++; } else { th += row; if (done) doneN++; }
     });
     $("bpTasks").innerHTML = th;
-    $("bpBonus").textContent = (fl & 64) ? "Нагороду дня отримано: $5 000 + кейс ✓" : "Виконайте всі 4 завдання — $5 000 і кейс.";
+    $("bpBonus").textContent = (fl & 33554432) ? "Нагороду дня отримано: $5 000 + кейс ✓ · інші завдання дають досвід" : "Виконайте будь-які 4 завдання — $5 000 і кейс. Виконано: " + doneN + " / 4";
     $("bpPrem").innerHTML = (prem
-      ? '<h2>Преміум-завдання</h2><p>' + ((fl & 128) ? "Нагороду отримано: $15 000 + 2 кейси ✓" : "Обидва завдання — $15 000 і 2 кейси, кожне +200 досвіду.") + '</p>'
-      : '<h2>Преміум-батлпас</h2><p>Золота доріжка нагород (VIP до 30 днів) і 2 преміум-завдання щодня.</p><button class="bp-buy" id="bpBuy">Активувати · ' + p[7] + ' березок</button>') +
+      ? '<h2>Преміум-завдання</h2><p>' + ((fl & 67108864) ? "Нагороду отримано: $15 000 + 2 кейси ✓" : "Будь-які 4 — $15 000 і 2 кейси. Виконано: " + doneP + " / 4") + '</p>'
+      : '<h2>Преміум-батлпас</h2><p>Золота доріжка нагород (VIP до 30 днів) і 10 преміум-завдань щодня.</p><button class="bp-buy" id="bpBuy">Активувати · ' + p[7] + ' BC</button>') +
       '<div class="bp-ptasks">' + ph + '</div>';
     if ($("bpBuy")) $("bpBuy").addEventListener("click", function (e) { e.stopPropagation(); send("bpbuy"); });
     show($("bp"), true);
@@ -529,7 +530,7 @@
     $("csNext").textContent = "Наступний безкоштовний: " + p[1] + " хв у грі";
     var sorted = csPrizes.map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) { return (rarity(b.x[0], b.x[1]) - rarity(a.x[0], a.x[1])) || (a.x[2] - b.x[2]); });
     $("csList").innerHTML = sorted.map(function (o) { return csItem(o.x); }).join("");
-    if (!csBusy) { csLeft(p[0]); show($("csRoll"), false); show($("csWin"), false); $("csStage").querySelector(".cs-chest").style.visibility = ""; }
+    if (!csBusy) { csLeft(p[0]); show($("csRoll"), false); show($("csWin"), false); $("csImg").src = "img/chest.png"; $("csImg").style.visibility = ""; }
     show($("cs"), true);
     document.body.classList.add("cs-open");
     syncFocus();
@@ -547,9 +548,9 @@
     var strip = $("csStrip");
     strip.innerHTML = items.join("");
     strip.style.transition = "none"; strip.style.transform = "translateX(0)";
+    setTimeout(function () { $("csStage").classList.remove("shake"); $("csImg").src = "img/chest_open.png"; }, 700);
     setTimeout(function () {
-      $("csStage").classList.remove("shake");
-      $("csStage").querySelector(".cs-chest").style.visibility = "hidden";
+      $("csImg").style.visibility = "hidden";
       show($("csRoll"), true);
       var it = strip.children[WIN], step = it.offsetWidth + parseFloat(getComputedStyle(strip).gap || 0);
       var off = WIN * step + it.offsetWidth / 2 + (Math.random() - .5) * it.offsetWidth * .6;
@@ -563,9 +564,9 @@
         csBusy = false;
         csLeft(p[1]);
       }, 5700);
-    }, 900);
+    }, 1700);
   });
-  $("csOk").addEventListener("click", function (e) { e.stopPropagation(); show($("csWin"), false); show($("csRoll"), false); $("csStage").querySelector(".cs-chest").style.visibility = ""; });
+  $("csOk").addEventListener("click", function (e) { e.stopPropagation(); show($("csWin"), false); show($("csRoll"), false); $("csImg").src = "img/chest.png"; $("csImg").style.visibility = ""; });
   $("csX").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy) return; send("panelx"); closePanels(true); });
 
   /* ---------------- гарячі клавіші (B / P / I) ---------------- */
