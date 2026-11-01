@@ -447,7 +447,7 @@
   function f(k, v) { return '<div class="fld"><small>' + k + '</small><b>' + esc(v || "—") + '</b></div>'; }
   function row(k, ok, yes) { return '<div class="lic-row"><span>' + k + '</span><b class="' + (ok ? "ok" : "no") + '">' + (ok ? yes : "Немає") + '</b></div>'; }
 
-  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open", "bp-open", "cs-open"); if ($("iMenu")) show($("iMenu"), false); show($("phone"), false); show($("inv"), false); show($("bp"), false); if (!csBusy) show($("cs"), false); unfocus(); }
+  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open", "bp-open", "cs-open"); if ($("iMenu")) show($("iMenu"), false); show($("phone"), false); show($("inv"), false); show($("bp"), false); if (typeof csStop === "function" && !$("cs").classList.contains("hidden")) csStop(); show($("cs"), false); unfocus(); }
 
   /* ---------------- нагороди (батлпас, кейси) ---------------- */
   // тип: 0 гроші, 1 кейс, 2 досвід, 3 аптечки, 4 VIP
@@ -517,12 +517,13 @@
   $("bpDon").addEventListener("click", function (e) { e.stopPropagation(); send("bpdon"); });
 
   /* ---------------- кейси ---------------- */
-  var csPrizes = [], csBusy = false;
+  var csPrizes = [], csBusy = false, csWatch = null, csLeftN = 0;
+  function csUnstick() { csBusy = false; csLeft(csLeftN); }
   function csItem(p, i) {
     var r = rew(p[0], p[1]), rr = rarity(p[0], p[1]);
     return '<div class="cs-item r' + rr + '"' + (i != null ? ' data-i="' + i + '"' : "") + '><i class="gi" style="--i:url(img/' + r.img + '.svg)"></i><b>' + esc(r.name) + '</b><small>' + r.sub + '</small></div>';
   }
-  function csLeft(n) { $("csLeft").textContent = "Залишилось " + n + " шт."; $("csOpen").disabled = !(+n > 0); $("csOpen").textContent = +n > 0 ? "Відкрити" : "Немає кейсів"; }
+  function csLeft(n) { csLeftN = n; $("csLeft").textContent = "Залишилось " + n + " шт."; $("csOpen").disabled = !(+n > 0); $("csOpen").textContent = +n > 0 ? "Відкрити" : "Немає кейсів"; }
   on("case", function (d) {
     var p = d.split("|");
     if (!csBusy && $("cs").classList.contains("hidden")) closePanels(true);
@@ -535,11 +536,15 @@
     document.body.classList.add("cs-open");
     syncFocus();
   });
-  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; send("caseopen"); });
+  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; send("caseopen");
+    clearTimeout(csWatch); csWatch = setTimeout(csUnstick, 4000);   // відповіді нема - розблокувати
+  });
   // v16.9: легка анімація без CSS-переходів (вбудований браузер гри не тягне важкі ефекти)
   function csReset() { $("csImg").className = "cs-chest"; show($("csRoll"), false); show($("csWin"), false); $("csImg").style.visibility = ""; }
   var csTick = null;
+  on("caseerr", function () { clearTimeout(csWatch); csUnstick(); });
   on("caseroll", function (d) {
+    clearTimeout(csWatch);
     var p = d.split("|"), w = +p[0], N = 28, items = [];
     var tot = csPrizes.reduce(function (s, x) { return s + (+x[2]); }, 0);
     for (var k = 0; k < N + 3; k++) {
@@ -577,7 +582,9 @@
     }, 900);
   });
   $("csOk").addEventListener("click", function (e) { e.stopPropagation(); csReset(); });
-  $("csX").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy) return; send("panelx"); closePanels(true); });
+  $("csX").addEventListener("click", function (e) { e.stopPropagation(); csStop(); send("panelx"); closePanels(true); });
+  // закрити можна будь-коли - приз уже зараховано на сервері
+  function csStop() { clearTimeout(csTick); clearTimeout(csWatch); csBusy = false; csReset(); }
 
   /* ---------------- гарячі клавіші (B / P / I) ---------------- */
   // браузер слухає клавіші завжди (cef_always_listen_keys), тому стежимо, чи відкрито чат гри (T/F6 ... Enter/Esc)
@@ -603,7 +610,7 @@
     if (!k || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return false;
     if (Date.now() - lastHot < 350) return true;
     lastHot = Date.now();
-    if (csBusy) return true;
+    if (!$("cs").classList.contains("hidden")) csStop();
     send("key " + k);
     return true;
   }
@@ -625,7 +632,7 @@
       if (!$("phone").classList.contains("hidden")) { send("ph -1"); closePanels(true); }
       else if (!$("inv").classList.contains("hidden")) { send("inv -1"); closePanels(true); }
       else if (!$("bp").classList.contains("hidden")) { send("panelx"); closePanels(true); }
-      else if (!$("cs").classList.contains("hidden") && !csBusy) { send("panelx"); closePanels(true); }
+      else if (!$("cs").classList.contains("hidden")) { csStop(); send("panelx"); closePanels(true); }
     }
   });
 
