@@ -518,7 +518,7 @@
 
   /* ---------------- кейси ---------------- */
   var csPrizes = [], csBusy = false, csWatch = null, csLeftN = 0;
-  function csUnstick() { csBusy = false; csLeft(csLeftN); }
+  function csUnstick() { csBusy = false; $("csStage").classList.remove("shake"); csLeft(csLeftN); }
   function csItem(p, i) {
     var r = rew(p[0], p[1]), rr = rarity(p[0], p[1]);
     return '<div class="cs-item r' + rr + '"' + (i != null ? ' data-i="' + i + '"' : "") + '><i class="gi" style="--i:url(img/' + r.img + '.svg)"></i><b>' + esc(r.name) + '</b><small>' + r.sub + '</small></div>';
@@ -536,55 +536,67 @@
     document.body.classList.add("cs-open");
     syncFocus();
   });
-  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; send("caseopen");
+  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; $("csStage").classList.add("shake"); send("caseopen");
     clearTimeout(csWatch); csWatch = setTimeout(csUnstick, 4000);   // відповіді нема - розблокувати
   });
-  // v16.9: легка анімація без CSS-переходів (вбудований браузер гри не тягне важкі ефекти)
-  function csReset() { $("csImg").className = "cs-chest"; show($("csRoll"), false); show($("csWin"), false); $("csImg").style.visibility = ""; }
-  var csTick = null;
-  on("caseerr", function () { clearTimeout(csWatch); csUnstick(); });
+  // v17.1: анімація повернута - скриня трясеться, кришка відкривається (11 кадрів), спалах, монетки, рулетка
+  var csFrameT = null, csTick = null, csT2 = null, csT3 = null;
+  function csFrame(i) { $("csImg").style.backgroundPosition = (i / 10 * 100) + "% 0"; }
+  function csReset() {
+    clearInterval(csFrameT); clearTimeout(csTick); clearTimeout(csT2); clearTimeout(csT3);
+    show($("csRoll"), false); show($("csWin"), false); csFrame(0);
+    var st = $("csStage"); st.classList.remove("burst"); st.classList.remove("shake");
+    $("csFx").innerHTML = ""; $("csImg").style.visibility = "";
+  }
+  function csOpenAnim() {
+    var i = 0, st = $("csStage"), fx = $("csFx");
+    clearInterval(csFrameT);
+    csFrameT = setInterval(function () { csFrame(++i); if (i >= 10) clearInterval(csFrameT); }, 45);
+    st.classList.remove("burst"); void st.offsetWidth; st.classList.add("burst");
+    fx.innerHTML = "";
+    for (var k = 0; k < 20; k++) {
+      var e = document.createElement("i"), ang = -Math.PI / 2 + (Math.random() - .5) * 2.4, dist = 14 + Math.random() * 22;
+      if (k % 3 === 0) e.className = "s";
+      e.style.setProperty("--x", (Math.cos(ang) * dist).toFixed(1) + "vh");
+      e.style.setProperty("--y", (Math.sin(ang) * dist).toFixed(1) + "vh");
+      e.style.animationDelay = (Math.random() * .25).toFixed(2) + "s";
+      fx.appendChild(e);
+    }
+  }
   on("caseroll", function (d) {
     clearTimeout(csWatch);
-    var p = d.split("|"), w = +p[0], N = 28, items = [];
+    var p = d.split("|"), w = +p[0], N = 40, WIN = 34, items = [];
     var tot = csPrizes.reduce(function (s, x) { return s + (+x[2]); }, 0);
-    for (var k = 0; k < N + 3; k++) {
+    for (var k = 0; k < N; k++) {
       var idx = w;
-      if (k !== N) { var r = Math.random() * tot; for (var j = 0; j < csPrizes.length; j++) { r -= +csPrizes[j][2]; if (r < 0) { idx = j; break; } } }
-      items.push(idx);
+      if (k !== WIN) { var r = Math.random() * tot; for (var j = 0; j < csPrizes.length; j++) { r -= +csPrizes[j][2]; if (r < 0) { idx = j; break; } } }
+      items.push(csItem(csPrizes[idx]));
     }
-    $("csImg").className = "cs-chest open";
-    var pos = 2, delay = 55;
-    clearTimeout(csTick);
-    function draw() {
-      var h = "";
-      for (var q = pos - 2; q <= pos + 2; q++) h += csItem(csPrizes[items[q]]).replace('class="cs-item', 'class="cs-item' + (q === pos ? " mid" : ""));
-      $("csStrip").innerHTML = h;
-    }
-    function step() {
-      if (pos >= N) {
-        csTick = setTimeout(function () {
-          $("csWCard").innerHTML = csItem(csPrizes[w]);
-          show($("csWin"), true);
-          csBusy = false;
-          csLeft(p[1]);
-        }, 700);
-        return;
-      }
-      pos++; draw();
-      delay = Math.min(420, delay * 1.11);
-      csTick = setTimeout(step, delay);
-    }
-    csTick = setTimeout(function () {
+    var strip = $("csStrip");
+    strip.innerHTML = items.join("");
+    strip.style.transition = "none"; strip.style.transform = "translateX(0)";
+    csTick = setTimeout(function () { $("csStage").classList.remove("shake"); csOpenAnim(); }, 700);
+    csT2 = setTimeout(function () {
       $("csImg").style.visibility = "hidden";
       show($("csRoll"), true);
-      draw();
-      csTick = setTimeout(step, delay);
-    }, 900);
+      var it = strip.children[WIN], step = it.offsetWidth + parseFloat(getComputedStyle(strip).gap || 0);
+      var off = WIN * step + it.offsetWidth / 2 + (Math.random() - .5) * it.offsetWidth * .6;
+      requestAnimationFrame(function () {
+        strip.style.transition = "transform 5.4s cubic-bezier(.08,.6,.12,1)";
+        strip.style.transform = "translateX(" + (-off) + "px)";
+      });
+      csT3 = setTimeout(function () {
+        $("csWCard").innerHTML = csItem(csPrizes[w]);
+        show($("csWin"), true);
+        csBusy = false;
+        csLeft(p[1]);
+      }, 5700);
+    }, 2300);
   });
   $("csOk").addEventListener("click", function (e) { e.stopPropagation(); csReset(); });
   $("csX").addEventListener("click", function (e) { e.stopPropagation(); csStop(); send("panelx"); closePanels(true); });
   // закрити можна будь-коли - приз уже зараховано на сервері
-  function csStop() { clearTimeout(csTick); clearTimeout(csWatch); csBusy = false; csReset(); }
+  function csStop() { clearTimeout(csWatch); csBusy = false; csReset(); }
 
   /* ---------------- гарячі клавіші (B / P / I) ---------------- */
   // браузер слухає клавіші завжди (cef_always_listen_keys), тому стежимо, чи відкрито чат гри (T/F6 ... Enter/Esc)
