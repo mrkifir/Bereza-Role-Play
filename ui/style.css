@@ -540,3 +540,7 @@ body.cs-open #hud, body.cs-open #speedo, body.cs-open .chip, body.cs-open #idCar
 .cs-wcard { animation: csPop .5s cubic-bezier(.2, 1.6, .4, 1); }
 @keyframes csPop { from { transform: scale(.4); opacity: 0; } }
 .cs-win { z-index: 5; animation: fade .25s; }
+
+.cs-btns { display: flex; gap: 1.4vh; align-items: center; }
+.cs-btns .cs-open { margin-top: 3vh; }
+.cs-quick { min-width: 18vh !important; padding: 1.6vh 2.4vh !important; background: linear-gradient(180deg, #4A4F6A, #33374D) !important; color: #FFD60A !important; box-shadow: 0 1vh 3vh rgba(0, 0, 0, .35) !important; }

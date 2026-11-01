@@ -523,7 +523,7 @@
     var r = rew(p[0], p[1]), rr = rarity(p[0], p[1]);
     return '<div class="cs-item r' + rr + '"' + (i != null ? ' data-i="' + i + '"' : "") + '><i class="gi" style="--i:url(img/' + r.img + '.svg)"></i><b>' + esc(r.name) + '</b><small>' + r.sub + '</small></div>';
   }
-  function csLeft(n) { csLeftN = n; $("csLeft").textContent = "Залишилось " + n + " шт."; $("csOpen").disabled = !(+n > 0); $("csOpen").textContent = +n > 0 ? "Відкрити" : "Немає кейсів"; }
+  function csLeft(n) { csLeftN = n; $("csLeft").textContent = "Залишилось " + n + " шт."; $("csOpen").disabled = !(+n > 0); $("csQuick").disabled = !(+n > 0); $("csOpen").textContent = +n > 0 ? "Відкрити" : "Немає кейсів"; }
   on("case", function (d) {
     var p = d.split("|");
     if (!csBusy && $("cs").classList.contains("hidden")) closePanels(true);
@@ -536,7 +536,13 @@
     document.body.classList.add("cs-open");
     syncFocus();
   });
-  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; $("csStage").classList.add("shake"); send("caseopen");
+  var csFast = false;
+  $("csQuick").addEventListener("click", function (e) {
+    e.stopPropagation(); if (csBusy || this.disabled) return;
+    csReset(); csFast = true; csBusy = true; this.disabled = true; $("csOpen").disabled = true; send("caseopen 1");
+    clearTimeout(csWatch); csWatch = setTimeout(csUnstick, 4000);
+  });
+  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csReset(); csFast = false; csBusy = true; this.disabled = true; $("csQuick").disabled = true; $("csStage").classList.add("shake"); send("caseopen");
     clearTimeout(csWatch); csWatch = setTimeout(csUnstick, 4000);   // відповіді нема - розблокувати
   });
   // v17.1: анімація повернута - скриня трясеться, кришка відкривається (11 кадрів), спалах, монетки, рулетка
@@ -566,6 +572,14 @@
   on("caseroll", function (d) {
     clearTimeout(csWatch);
     var p = d.split("|"), w = +p[0], N = 40, WIN = 34, items = [];
+    if (csFast) {   // швидке відкриття - одразу приз
+      csFrame(10);
+      $("csWCard").innerHTML = csItem(csPrizes[w]);
+      show($("csWin"), true);
+      csBusy = false;
+      csLeft(p[1]);
+      return;
+    }
     var tot = csPrizes.reduce(function (s, x) { return s + (+x[2]); }, 0);
     for (var k = 0; k < N; k++) {
       var idx = w;
