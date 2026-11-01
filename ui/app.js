@@ -530,66 +530,58 @@
     $("csNext").textContent = "Наступний безкоштовний: " + p[1] + " хв у грі";
     var sorted = csPrizes.map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) { return (rarity(b.x[0], b.x[1]) - rarity(a.x[0], a.x[1])) || (a.x[2] - b.x[2]); });
     $("csList").innerHTML = sorted.map(function (o) { return csItem(o.x); }).join("");
-    if (!csBusy) { csLeft(p[0]); show($("csRoll"), false); show($("csWin"), false); csFrame(0); $("csStage").classList.remove("burst"); $("csFx").innerHTML = ""; $("csImg").style.visibility = ""; }
+    if (!csBusy) { csLeft(p[0]); csReset(); }
     show($("cs"), true);
     document.body.classList.add("cs-open");
     syncFocus();
   });
-  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; $("csStage").classList.add("shake"); send("caseopen"); });
-  // кришка відкривається (11 кадрів), промені, спалах і монетки
-  var csFrameT = null;
-  function csFrame(i) { $("csImg").style.backgroundPosition = (i / 10 * 100) + "% 0"; }
-  function csOpenAnim() {
-    var i = 0, st = $("csStage"), fx = $("csFx");
-    clearInterval(csFrameT);
-    csFrameT = setInterval(function () { csFrame(++i); if (i >= 10) clearInterval(csFrameT); }, 45);
-    st.classList.remove("burst"); void st.offsetWidth; st.classList.add("burst");
-    fx.innerHTML = "";
-    for (var k = 0; k < 14; k++) {
-      var e = document.createElement("i"), ang = -Math.PI / 2 + (Math.random() - .5) * 2.4, dist = 14 + Math.random() * 22;
-      if (k % 3 === 0) e.className = "s";
-      e.style.setProperty("--x", (Math.cos(ang) * dist).toFixed(1) + "vh");
-      e.style.setProperty("--y", (Math.sin(ang) * dist).toFixed(1) + "vh");
-      e.style.animationDelay = (Math.random() * .25).toFixed(2) + "s";
-      fx.appendChild(e);
-    }
-  }
+  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; send("caseopen"); });
+  // v16.9: легка анімація без CSS-переходів (вбудований браузер гри не тягне важкі ефекти)
+  function csReset() { $("csImg").className = "cs-chest"; show($("csRoll"), false); show($("csWin"), false); $("csImg").style.visibility = ""; }
+  var csTick = null;
   on("caseroll", function (d) {
-    var p = d.split("|"), w = +p[0], N = 34, WIN = 28, items = [];
-    // смуга: випадкові призи за вагою, виграш на позиції WIN
+    var p = d.split("|"), w = +p[0], N = 28, items = [];
     var tot = csPrizes.reduce(function (s, x) { return s + (+x[2]); }, 0);
-    for (var k = 0; k < N; k++) {
+    for (var k = 0; k < N + 3; k++) {
       var idx = w;
-      if (k !== WIN) { var r = Math.random() * tot; for (var j = 0; j < csPrizes.length; j++) { r -= +csPrizes[j][2]; if (r < 0) { idx = j; break; } } }
-      items.push(csItem(csPrizes[idx]));
+      if (k !== N) { var r = Math.random() * tot; for (var j = 0; j < csPrizes.length; j++) { r -= +csPrizes[j][2]; if (r < 0) { idx = j; break; } } }
+      items.push(idx);
     }
-    var strip = $("csStrip");
-    strip.innerHTML = items.join("");
-    strip.style.transition = "none"; strip.style.transform = "translateX(0)";
-    setTimeout(function () { $("csStage").classList.remove("shake"); csOpenAnim(); }, 700);
-    setTimeout(function () {
+    $("csImg").className = "cs-chest open";
+    var pos = 2, delay = 55;
+    clearTimeout(csTick);
+    function draw() {
+      var h = "";
+      for (var q = pos - 2; q <= pos + 2; q++) h += csItem(csPrizes[items[q]]).replace('class="cs-item', 'class="cs-item' + (q === pos ? " mid" : ""));
+      $("csStrip").innerHTML = h;
+    }
+    function step() {
+      if (pos >= N) {
+        csTick = setTimeout(function () {
+          $("csWCard").innerHTML = csItem(csPrizes[w]);
+          show($("csWin"), true);
+          csBusy = false;
+          csLeft(p[1]);
+        }, 700);
+        return;
+      }
+      pos++; draw();
+      delay = Math.min(420, delay * 1.11);
+      csTick = setTimeout(step, delay);
+    }
+    csTick = setTimeout(function () {
       $("csImg").style.visibility = "hidden";
       show($("csRoll"), true);
-      var it = strip.children[WIN], step = it.offsetWidth + parseFloat(getComputedStyle(strip).gap || 0);
-      var off = WIN * step + it.offsetWidth / 2 + (Math.random() - .5) * it.offsetWidth * .6;
-      requestAnimationFrame(function () {
-        strip.style.transition = "transform 5.4s cubic-bezier(.08,.6,.12,1)";
-        strip.style.transform = "translateX(" + (-off) + "px)";
-      });
-      setTimeout(function () {
-        $("csWCard").innerHTML = csItem(csPrizes[w]);
-        show($("csWin"), true);
-        csBusy = false;
-        csLeft(p[1]);
-      }, 5700);
-    }, 2300);
+      draw();
+      csTick = setTimeout(step, delay);
+    }, 900);
   });
-  $("csOk").addEventListener("click", function (e) { e.stopPropagation(); show($("csWin"), false); show($("csRoll"), false); csFrame(0); $("csStage").classList.remove("burst"); $("csFx").innerHTML = ""; $("csImg").style.visibility = ""; });
+  $("csOk").addEventListener("click", function (e) { e.stopPropagation(); csReset(); });
   $("csX").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy) return; send("panelx"); closePanels(true); });
 
   /* ---------------- гарячі клавіші (B / P / I) ---------------- */
   // браузер слухає клавіші завжди (cef_always_listen_keys), тому стежимо, чи відкрито чат гри (T/F6 ... Enter/Esc)
-  var chatOpen = false, chatAt = 0, lastHot = 0;
+  var lastHot = 0;
   // фізична клавіша незалежно від розкладки (EN / UA / RU)
   var CYR = { "и": 66, "з": 80, "ш": 73, "е": 84, "ё": 192, "'": 192 };
   function keyOf(e) {
@@ -604,14 +596,11 @@
     return c;
   }
   function hotKey(e) {
-    var c = keyOf(e);
-    if (chatOpen && Date.now() - chatAt > 45000) chatOpen = false;   // запобіжник: чат не буває відкритим вічно
-    if (c === 84 || c === 117 || c === 192) { if (!dlg && !anyPanel() && !chatOpen) { chatOpen = true; chatAt = Date.now(); } return false; }    // T, F6, ~
-    if (c === 13 || c === 27) { chatOpen = false; return false; }
-    if (chatOpen || dlg) return false;
+    if (dlg) return false;
     var t = document.activeElement; if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return false;
+    var c = keyOf(e);
     var k = c === 66 ? "b" : c === 80 ? "p" : c === 73 ? "i" : "";
-    if (!k || e.repeat || e.ctrlKey || e.altKey) return false;
+    if (!k || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return false;
     if (Date.now() - lastHot < 350) return true;
     lastHot = Date.now();
     if (csBusy) return true;
@@ -622,14 +611,7 @@
   on("panel", function () { closePanels(true); });
 
   /* ---------------- клавіатура ---------------- */
-  var downSeen = {};
-  document.addEventListener("keyup", function (e) {
-    var c = keyOf(e);
-    if (downSeen[c]) { downSeen[c] = false; return; }
-    hotKey(e);   // клавіша прийшла лише як keyup (браузер без фокусу)
-  });
   document.addEventListener("keydown", function (e) {
-    downSeen[keyOf(e)] = true;
     if (hotKey(e)) { e.preventDefault(); return; }
     if (dlg) {
       if (e.key === "Enter") { e.preventDefault(); respond(1); }
