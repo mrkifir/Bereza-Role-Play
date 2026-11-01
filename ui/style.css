@@ -414,7 +414,7 @@ body.cs-open #hud, body.cs-open #speedo, body.cs-open .chip, body.cs-open #idCar
 .bp-card.can em { position: absolute; left: .8vh; right: .8vh; bottom: 1.2vh; font-style: normal; font-size: 1.5vh; padding: .4vh 0; border-radius: .6vh; background: #FFD60A; color: #14161C; text-transform: uppercase; }
 .bp-card.can b { margin-bottom: 2.6vh; }
 @keyframes bpPulse { 50% { box-shadow: inset 0 0 0 .25vh #FFD60A, 0 0 3.6vh rgba(255, 214, 10, .6); } }
-.bp-bottom { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2vh; min-height: 0; }
+.bp-bottom { display: grid; grid-template-columns: 1.3fr 1fr; gap: 2vh; min-height: 0; }
 .bp-tasks, .bp-prem { border-radius: 1.4vh; background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07); padding: 1.8vh 2vh; }
 .bp-h { font-size: 2.2vh; text-transform: uppercase; margin-bottom: 1.2vh; }
 .bp-h small { margin-left: 1vh; font-size: 1.4vh; color: rgba(255, 255, 255, .45); text-transform: none; }
@@ -447,8 +447,8 @@ body.cs-open #hud, body.cs-open #speedo, body.cs-open .chip, body.cs-open #idCar
 .cs-banner .gi { font-size: 6vh; background: #1B1305; filter: none; }
 .cs-sub { margin-top: 3vh; font: 500 1.6vh "Manrope", sans-serif; color: rgba(255, 255, 255, .6); }
 .cs-name { margin-top: .4vh; font-size: 5.4vh; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
-.cs-stage { position: relative; width: 100%; height: 30vh; display: grid; place-items: center; }
-.cs-chest { height: 30vh; filter: drop-shadow(0 2vh 3vh rgba(0, 0, 0, .5)); animation: csFloat 3s ease-in-out infinite; }
+.cs-stage { position: relative; width: 100%; height: 31vh; display: grid; place-items: center; }
+.cs-chest { height: 44vh; margin: -7vh 0; filter: drop-shadow(0 2vh 3vh rgba(0, 0, 0, .5)); animation: csFloat 3s ease-in-out infinite; }
 @keyframes csFloat { 50% { transform: translateY(-1.2vh); } }
 .cs-stage.shake .cs-chest { animation: csShake .35s 3; }
 @keyframes csShake { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
@@ -456,7 +456,7 @@ body.cs-open #hud, body.cs-open #speedo, body.cs-open .chip, body.cs-open #idCar
   -webkit-mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); mask: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
 .cs-strip { position: absolute; left: 50%; top: 1vh; display: flex; gap: 1.2vh; will-change: transform; }
 .cs-mark { position: absolute; left: 50%; top: 0; bottom: 0; width: .4vh; margin-left: -.2vh; background: #FFD60A; box-shadow: 0 0 2vh #FFD60A; }
-.cs-open { margin-top: 2vh; min-width: 30vh; padding: 1.6vh 4vh; border: 0; border-radius: 1.4vh; cursor: pointer; font: 600 2.2vh "Oswald", sans-serif; text-transform: uppercase; color: #1B1305;
+.cs-open { position: relative; margin-top: 3vh; min-width: 30vh; padding: 1.6vh 4vh; border: 0; border-radius: 1.4vh; cursor: pointer; font: 600 2.2vh "Oswald", sans-serif; text-transform: uppercase; color: #1B1305;
   background: linear-gradient(180deg, #FFB21A, #FF8A00); box-shadow: 0 1vh 3vh rgba(255, 138, 0, .4); }
 .cs-open:hover { filter: brightness(1.08); }
 .cs-open:disabled { filter: grayscale(1) brightness(.6); cursor: default; }
@@ -481,3 +481,10 @@ body.cs-open #hud, body.cs-open #speedo, body.cs-open .chip, body.cs-open #idCar
 .cs-wcard .cs-item { box-shadow: inset 0 0 0 .3vh var(--rc), 0 0 6vh var(--rc); }
 .cs-win .cs-open { margin-top: 8vh; }
 @keyframes csPop { from { transform: scale(.4); opacity: 0; } }
+
+.bp-chip.bz { background: linear-gradient(180deg, #5FD3FF, #2F8FED); box-shadow: 0 .6vh 2vh rgba(47, 143, 237, .35); }
+.bp-prem { justify-content: flex-start; overflow: hidden; }
+.bp-ptasks .bp-task { border-color: rgba(255, 214, 10, .15); }
+.bp-ptasks .bp-task .bp-bar i { background: linear-gradient(90deg, #FFB21A, #FFE36E); }
+.bp-task.lock { opacity: .45; }
+.bp-task.lock b { color: #FFD60A; }

@@ -487,16 +487,19 @@
         '<div class="bp-card prem r' + rarity(b[0], b[1]) + cB + '" data-l="' + i + '" data-t="1"><i class="gi" style="--i:url(img/' + rb.img + '.svg)"></i><b>' + esc(rb.name) + '</b>' + (cB === " can" ? "<em>Забрати</em>" : "") + '</div></div>';
     }
     $("bpTrack").innerHTML = h;
-    var tk = p[11].split(";"), th = "";
-    tk.forEach(function (x) {
-      var q = x.split("~"), done = q[3] === "1", pc = Math.min(100, q[1] / q[2] * 100);
-      th += '<div class="bp-task' + (done ? " done" : "") + '"><span>' + esc(q[0]) + '</span><b>' + (done ? "Виконано" : q[1] + " / " + q[2] + " · " + money(q[4])) + '</b><div class="bp-bar"><i style="width:' + pc + '%"></i></div></div>';
+    var tk = p[11].split(";"), th = "", fl = +p[12], ph = "";
+    $("bpBz").textContent = p[13] || 0;
+    tk.forEach(function (x, k) {
+      var q = x.split("~"), done = q[3] === "1", pc = Math.min(100, q[1] / q[2] * 100), pm = q[4] === "1";
+      var row = '<div class="bp-task' + (done ? " done" : "") + (pm && !prem ? " lock" : "") + '"><span>' + esc(q[0]) + '</span><b>' + (done ? "Виконано" : (pm && !prem) ? "Преміум" : q[1] + " / " + q[2]) + '</b><div class="bp-bar"><i style="width:' + pc + '%"></i></div></div>';
+      if (pm) ph += row; else th += row;
     });
     $("bpTasks").innerHTML = th;
-    $("bpBonus").textContent = p[12] === "1" ? "Бонус за всі три завдання отримано ✓" : "За всі три завдання — кейс у подарунок.";
-    $("bpPrem").innerHTML = prem
-      ? '<h2>Преміум активний ✓</h2><p>Золоті нагороди відкриваються разом з рівнем. Забирайте їх у нижньому ряду.</p>'
-      : '<h2>Преміум-батлпас</h2><p>Друга доріжка нагород: більше грошей, кейсів, досвіду і VIP до 30 днів. Нагороди за вже відкриті рівні — одразу.</p><button class="bp-buy" id="bpBuy">Активувати за ' + money(p[7]) + '</button>';
+    $("bpBonus").textContent = (fl & 64) ? "Нагороду дня отримано: $5 000 + кейс ✓" : "Виконайте всі 4 завдання — $5 000 і кейс.";
+    $("bpPrem").innerHTML = (prem
+      ? '<h2>Преміум-завдання</h2><p>' + ((fl & 128) ? "Нагороду отримано: $15 000 + 2 кейси ✓" : "Обидва завдання — $15 000 і 2 кейси, кожне +200 досвіду.") + '</p>'
+      : '<h2>Преміум-батлпас</h2><p>Золота доріжка нагород (VIP до 30 днів) і 2 преміум-завдання щодня.</p><button class="bp-buy" id="bpBuy">Активувати · ' + p[7] + ' березок</button>') +
+      '<div class="bp-ptasks">' + ph + '</div>';
     if ($("bpBuy")) $("bpBuy").addEventListener("click", function (e) { e.stopPropagation(); send("bpbuy"); });
     show($("bp"), true);
     document.body.classList.add("bp-open");
@@ -510,6 +513,7 @@
   $("bpTrack").addEventListener("wheel", function (e) { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); this.scrollLeft += e.deltaY; } }, { passive: false });
   $("bpX").addEventListener("click", function (e) { e.stopPropagation(); send("panelx"); closePanels(true); });
   $("bpCases").addEventListener("click", function (e) { e.stopPropagation(); send("bpcase"); });
+  $("bpDon").addEventListener("click", function (e) { e.stopPropagation(); send("bpdon"); });
 
   /* ---------------- кейси ---------------- */
   var csPrizes = [], csBusy = false;
