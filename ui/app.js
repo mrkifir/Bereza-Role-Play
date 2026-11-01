@@ -545,7 +545,7 @@
     csFrameT = setInterval(function () { csFrame(++i); if (i >= 10) clearInterval(csFrameT); }, 45);
     st.classList.remove("burst"); void st.offsetWidth; st.classList.add("burst");
     fx.innerHTML = "";
-    for (var k = 0; k < 26; k++) {
+    for (var k = 0; k < 14; k++) {
       var e = document.createElement("i"), ang = -Math.PI / 2 + (Math.random() - .5) * 2.4, dist = 14 + Math.random() * 22;
       if (k % 3 === 0) e.className = "s";
       e.style.setProperty("--x", (Math.cos(ang) * dist).toFixed(1) + "vh");
@@ -555,7 +555,7 @@
     }
   }
   on("caseroll", function (d) {
-    var p = d.split("|"), w = +p[0], N = 46, WIN = 40, items = [];
+    var p = d.split("|"), w = +p[0], N = 34, WIN = 28, items = [];
     // смуга: випадкові призи за вагою, виграш на позиції WIN
     var tot = csPrizes.reduce(function (s, x) { return s + (+x[2]); }, 0);
     for (var k = 0; k < N; k++) {
@@ -590,8 +590,21 @@
   /* ---------------- гарячі клавіші (B / P / I) ---------------- */
   // браузер слухає клавіші завжди (cef_always_listen_keys), тому стежимо, чи відкрито чат гри (T/F6 ... Enter/Esc)
   var chatOpen = false, chatAt = 0, lastHot = 0;
+  // фізична клавіша незалежно від розкладки (EN / UA / RU)
+  var CYR = { "и": 66, "з": 80, "ш": 73, "е": 84, "ё": 192, "'": 192 };
+  function keyOf(e) {
+    var code = e.code || "";
+    if (/^Key[A-Z]$/.test(code)) return code.charCodeAt(3);
+    if (code === "Backquote") return 192;
+    var k = (e.key || "").toLowerCase();
+    if (CYR[k]) return CYR[k];
+    if (k.length === 1 && k >= "a" && k <= "z") return k.toUpperCase().charCodeAt(0);
+    var c = e.keyCode || e.which || 0;
+    if (c >= 1040) { var ch = String.fromCharCode(c).toLowerCase(); if (CYR[ch]) return CYR[ch]; }
+    return c;
+  }
   function hotKey(e) {
-    var c = e.keyCode || e.which;
+    var c = keyOf(e);
     if (chatOpen && Date.now() - chatAt > 45000) chatOpen = false;   // запобіжник: чат не буває відкритим вічно
     if (c === 84 || c === 117 || c === 192) { if (!dlg && !anyPanel() && !chatOpen) { chatOpen = true; chatAt = Date.now(); } return false; }    // T, F6, ~
     if (c === 13 || c === 27) { chatOpen = false; return false; }
@@ -611,12 +624,12 @@
   /* ---------------- клавіатура ---------------- */
   var downSeen = {};
   document.addEventListener("keyup", function (e) {
-    var c = e.keyCode || e.which;
+    var c = keyOf(e);
     if (downSeen[c]) { downSeen[c] = false; return; }
     hotKey(e);   // клавіша прийшла лише як keyup (браузер без фокусу)
   });
   document.addEventListener("keydown", function (e) {
-    downSeen[e.keyCode || e.which] = true;
+    downSeen[keyOf(e)] = true;
     if (hotKey(e)) { e.preventDefault(); return; }
     if (dlg) {
       if (e.key === "Enter") { e.preventDefault(); respond(1); }
