@@ -119,7 +119,7 @@
     <div class="iv-head"><button class="iv-x" id="iX" aria-label="Закрити"></button><h1>Інвентар</h1></div>
     <div class="iv-body">
       <div class="iv-eq" id="iEqL"></div>
-      <div class="iv-char" id="iChar"><div class="iv-skin" id="iSkin"></div></div>
+      <div class="iv-char" id="iChar"><svg class="iv-sil" viewBox="0 0 200 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="silg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4a52"/><stop offset="1" stop-color="#26262b"/></linearGradient></defs><g fill="url(#silg)" stroke="rgba(255,255,255,.10)" stroke-width="2"><circle cx="100" cy="52" r="34"/><path d="M84 84h32v14H84z"/><path d="M58 100c-18 4-28 16-30 34l-12 120c-1 9 4 15 11 16s13-4 14-12l12-104 4 0 -4 130 0 96 6 108c1 10 8 16 17 16s15-7 15-16l2-150h14l2 150c0 9 6 16 15 16s16-6 17-16l6-108 0-96-4-130 4 0 12 104c1 8 7 13 14 12s12-7 11-16l-12-120c-2-18-12-30-30-34z"/></g></svg><div class="iv-skin" id="iSkin"></div></div>
       <div class="iv-eq" id="iEqR"></div>
     </div>
     <div class="iv-stats">
@@ -145,6 +145,66 @@
 </div>
 
 <div id="doc" class="hidden"></div>
+
+
+<!-- ===== Батлпас ===== -->
+<div id="bp" class="hidden">
+  <div class="bp-bg"></div>
+  <div class="bp-wrap">
+    <div class="bp-top">
+      <button class="iv-x" id="bpX" aria-label="Закрити"></button>
+      <div class="bp-title"><h1>Батлпас</h1><span>Сезон 1 · «Осінь у Березі»</span></div>
+      <div class="bp-lvl"><div class="bp-ring"><b id="bpLvl">0</b><small>рівень</small></div>
+        <div class="bp-xp"><div class="bp-xpt"><span>Досвід рівня</span><b id="bpXpT">0 / 150</b></div><div class="bp-bar"><i id="bpBar"></i></div></div></div>
+      <button class="bp-chip" id="bpCases"><i class="gi" style="--i:url(img/box.svg)"></i><span>Кейси: <b id="bpCaseN">0</b></span></button>
+    </div>
+    <div class="bp-trackbox">
+      <div class="bp-rowlbl"><span>Звичайний</span><span class="p">Преміум</span></div>
+      <div class="bp-track" id="bpTrack"></div>
+    </div>
+    <div class="bp-bottom">
+      <div class="bp-tasks"><div class="bp-h">Завдання дня <small>оновлюються опівночі · кожне +100 очок</small></div><div id="bpTasks"></div><div class="bp-bonus" id="bpBonus"></div></div>
+      <div class="bp-prem" id="bpPrem"></div>
+    </div>
+    <div class="iv-hint">B або ESC — закрити · очки: завдання дня (100), 1 хв у грі (1), скарб (50)</div>
+  </div>
+</div>
+
+<!-- ===== Кейси ===== -->
+<div id="cs" class="hidden">
+  <div class="cs-bg"></div>
+  <button class="iv-x cs-x" id="csX" aria-label="Закрити"></button>
+  <div class="cs-wrap">
+    <div class="cs-banner"><div><b>Кейс Берези</b><small id="csNext">Наступний безкоштовний: — хв</small></div><i class="gi" style="--i:url(img/box.svg)"></i></div>
+    <div class="cs-sub">Ви відкриваєте кейс</div>
+    <div class="cs-name">Березовий</div>
+    <div class="cs-stage" id="csStage"><svg class="cs-chest" viewBox="0 0 320 260" aria-hidden="true">
+  <defs>
+    <linearGradient id="chB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3B6E"/><stop offset="1" stop-color="#141C38"/></linearGradient>
+    <linearGradient id="chL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A57A8"/><stop offset="1" stop-color="#22336A"/></linearGradient>
+    <linearGradient id="chG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE680"/><stop offset=".5" stop-color="#FFC21A"/><stop offset="1" stop-color="#C98A00"/></linearGradient>
+    <radialGradient id="chGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFD60A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD60A" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="160" cy="130" rx="160" ry="120" fill="url(#chGlow)"/>
+  <ellipse cx="160" cy="238" rx="118" ry="14" fill="rgba(0,0,0,.45)"/>
+  <path d="M52 112h216v112a10 10 0 0 1-10 10H62a10 10 0 0 1-10-10z" fill="url(#chB)"/>
+  <path d="M46 70c0-26 20-44 46-44h136c26 0 46 18 46 44v42H46z" fill="url(#chL)"/>
+  <path d="M46 104h228v14H46z" fill="url(#chG)"/>
+  <path d="M86 26h18v208H86zM216 26h18v208h-18z" fill="url(#chG)" opacity=".95"/>
+  <path d="M52 216h216v8H52z" fill="url(#chG)" opacity=".8"/>
+  <rect x="136" y="96" width="48" height="56" rx="8" fill="url(#chG)"/>
+  <rect x="148" y="112" width="24" height="26" rx="5" fill="#1A2550"/>
+  <circle cx="160" cy="122" r="5" fill="url(#chG)"/><path d="M157 124h6l2 10h-10z" fill="url(#chG)"/>
+  <path d="M60 60 L70 50 M250 52 L262 62" stroke="#fff" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/>
+</svg>
+      <div class="cs-roll hidden" id="csRoll"><div class="cs-strip" id="csStrip"></div><div class="cs-mark"></div></div>
+    </div>
+    <button class="cs-open" id="csOpen">Відкрити</button>
+    <div class="cs-left" id="csLeft">Залишилось 0 шт.</div>
+  </div>
+  <div class="cs-prizes"><div class="cs-ph">Що можна виграти?</div><div class="cs-list" id="csList"></div></div>
+  <div class="cs-win hidden" id="csWin"><div class="cs-wcard" id="csWCard"></div><button class="cs-open" id="csOk">Забрати</button></div>
+</div>
 
 <div id="toast"></div>
 

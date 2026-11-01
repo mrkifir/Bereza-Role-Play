@@ -12,7 +12,7 @@
   if (!live) { document.documentElement.classList.add("preview"); window.__fire = function (n, d) { (handlers[n] || []).forEach(function (f) { f(d); }); }; }
   // фокус (курсор + клавіатура) — тримаємо, поки відкрито діалог, телефон або інвентар
   function syncFocus() {
-    var want = !!dlg || !$("phone").classList.contains("hidden") || !$("inv").classList.contains("hidden");
+    var want = !!dlg || ["phone", "inv", "bp", "cs"].some(function (id) { return !$(id).classList.contains("hidden"); });
     if (live && bridge.set_focus) bridge.set_focus(want);
   }
   var unfocus = syncFocus;
@@ -212,7 +212,7 @@
     cols.forEach(function (c, k) {
       var s = document.createElement("div"); s.className = "dcol";
       // звичайний список: нумерація [1], [2] ... (якщо пункт ще не має номера)
-      var num = (!head && k === 0 && dlg && dlg.style === 2 && !/^\s*(\{[0-9a-fA-F]{6}\})?\s*\[/.test(c)) ? '<span class="num">' + (i + 1) + '</span> ' : "";
+      var num = (!head && k === 0 && dlg && dlg.style === 2 && !/^\s*(\{[0-9a-fA-F]{6}\})?\s*\[/.test(c)) ? '<span class="num">[' + (i + 1) + ']</span> ' : "";
       s.innerHTML = num + samp(c); row.appendChild(s);
     });
     if (!head) {
@@ -405,14 +405,8 @@
     });
   });
   // вікно персонажа: сервер малює модель скіна саме в цьому прямокутнику (координати 640x448)
-  function sendPreview() {
-    var r = $("iChar").getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
-    if (!r.width) return;
-    // «вікно» у фоні, щоб модель персонажа з гри було видно
-    var x = Math.round(r.left), y = Math.round(r.top), w = Math.round(r.width), h = Math.round(r.height);
-    $("inv").querySelector(".iv-bg").style.clipPath = 'path(evenodd, "M0 0 H' + W + ' V' + H + ' H0 Z M' + x + ' ' + y + ' h' + w + ' v' + h + ' h-' + w + ' Z")';
-    send("invpv " + Math.round(r.left / W * 6400) + " " + Math.round(r.top / H * 4480) + " " + Math.round(r.width / W * 6400) + " " + Math.round(r.height * 0.95 / H * 4480));
-  }
+  // v16.2: замість моделі з гри - силует (модель просвічувала чат і світ гри)
+  function sendPreview() { }
   on("inv", function (d) {
     var wasOpen = !$("inv").classList.contains("hidden");
     inv = d.split("|");
@@ -453,11 +447,146 @@
   function f(k, v) { return '<div class="fld"><small>' + k + '</small><b>' + esc(v || "—") + '</b></div>'; }
   function row(k, ok, yes) { return '<div class="lic-row"><span>' + k + '</span><b class="' + (ok ? "ok" : "no") + '">' + (ok ? yes : "Немає") + '</b></div>'; }
 
-  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open"); if ($("iMenu")) show($("iMenu"), false); show($("phone"), false); show($("inv"), false); unfocus(); }
+  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open", "bp-open", "cs-open"); if ($("iMenu")) show($("iMenu"), false); show($("phone"), false); show($("inv"), false); show($("bp"), false); if (!csBusy) show($("cs"), false); unfocus(); }
+
+  /* ---------------- нагороди (батлпас, кейси) ---------------- */
+  // тип: 0 гроші, 1 кейс, 2 досвід, 3 аптечки, 4 VIP
+  var REW = [
+    { img: "money", f: function (n) { return money(n); }, s: "Гроші" },
+    { img: "box", f: function (n) { return "Кейс ×" + n; }, s: "Кейс" },
+    { img: "star", f: function (n) { return "+" + n + " досвіду"; }, s: "Досвід" },
+    { img: "medkit", f: function (n) { return "Аптечки ×" + n; }, s: "Аптечки" },
+    { img: "crown", f: function (n) { return "VIP " + n + " дн."; }, s: "VIP-статус" }
+  ];
+  function rew(t, n) { var r = REW[+t] || REW[0]; return { img: r.img, name: r.f(+n), sub: r.s }; }
+  function rarity(t, n) {
+    t = +t; n = +n;
+    if (t === 4) return n >= 7 ? 4 : 3;
+    if (t === 0) return n >= 50000 ? 4 : n >= 15000 ? 3 : n >= 7500 ? 2 : n >= 3000 ? 1 : 0;
+    if (t === 1) return n >= 4 ? 3 : n >= 2 ? 2 : 1;
+    return t === 2 ? (n >= 6 ? 2 : 1) : 1;
+  }
+
+  /* ---------------- батлпас ---------------- */
+  var bpScrolled = false;
+  on("bp", function (d) {
+    var p = d.split("|"), lvl = +p[0], prem = p[4] === "1", got = +p[5], gotP = +p[6], max = +p[3];
+    var wasOpen = !$("bp").classList.contains("hidden");
+    if (!wasOpen) { closePanels(true); bpScrolled = false; }
+    $("bpLvl").textContent = lvl;
+    $("bpXpT").textContent = lvl >= max ? "МАКС." : (p[1] + " / " + p[2]);
+    $("bpBar").style.width = (lvl >= max ? 100 : Math.min(100, p[1] / p[2] * 100)) + "%";
+    $("bpCaseN").textContent = p[8];
+    var fr = p[9].split(";"), pr = p[10].split(";"), h = "";
+    for (var i = 0; i < max; i++) {
+      var open = i < lvl, a = fr[i].split(":"), b = pr[i].split(":"), ra = rew(a[0], a[1]), rb = rew(b[0], b[1]);
+      var gA = (got >> i) & 1, gB = (gotP >> i) & 1;
+      var cA = gA ? " got" : open ? " can" : " lock", cB = gB ? " got" : (open && prem) ? " can" : " lock";
+      h += '<div class="bp-col' + (open ? " open" : "") + (i === lvl ? " cur" : "") + '"><div class="bp-num">' + (i + 1) + '</div>' +
+        '<div class="bp-card r' + rarity(a[0], a[1]) + cA + '" data-l="' + i + '" data-t="0"><i class="gi" style="--i:url(img/' + ra.img + '.svg)"></i><b>' + esc(ra.name) + '</b>' + (cA === " can" ? "<em>Забрати</em>" : "") + '</div>' +
+        '<div class="bp-card prem r' + rarity(b[0], b[1]) + cB + '" data-l="' + i + '" data-t="1"><i class="gi" style="--i:url(img/' + rb.img + '.svg)"></i><b>' + esc(rb.name) + '</b>' + (cB === " can" ? "<em>Забрати</em>" : "") + '</div></div>';
+    }
+    $("bpTrack").innerHTML = h;
+    var tk = p[11].split(";"), th = "";
+    tk.forEach(function (x) {
+      var q = x.split("~"), done = q[3] === "1", pc = Math.min(100, q[1] / q[2] * 100);
+      th += '<div class="bp-task' + (done ? " done" : "") + '"><span>' + esc(q[0]) + '</span><b>' + (done ? "Виконано" : q[1] + " / " + q[2] + " · " + money(q[4])) + '</b><div class="bp-bar"><i style="width:' + pc + '%"></i></div></div>';
+    });
+    $("bpTasks").innerHTML = th;
+    $("bpBonus").textContent = p[12] === "1" ? "Бонус за всі три завдання отримано ✓" : "За всі три завдання — кейс у подарунок.";
+    $("bpPrem").innerHTML = prem
+      ? '<h2>Преміум активний ✓</h2><p>Золоті нагороди відкриваються разом з рівнем. Забирайте їх у нижньому ряду.</p>'
+      : '<h2>Преміум-батлпас</h2><p>Друга доріжка нагород: більше грошей, кейсів, досвіду і VIP до 30 днів. Нагороди за вже відкриті рівні — одразу.</p><button class="bp-buy" id="bpBuy">Активувати за ' + money(p[7]) + '</button>';
+    if ($("bpBuy")) $("bpBuy").addEventListener("click", function (e) { e.stopPropagation(); send("bpbuy"); });
+    show($("bp"), true);
+    document.body.classList.add("bp-open");
+    syncFocus();
+    if (!bpScrolled) { bpScrolled = true; var t = $("bpTrack"), c = t.children[Math.max(0, lvl - 2)]; t.style.scrollBehavior = "auto"; t.scrollLeft = c ? c.offsetLeft - t.offsetLeft : 0; t.style.scrollBehavior = ""; }
+  });
+  $("bpTrack").addEventListener("click", function (e) {
+    var c = e.target.closest(".bp-card.can"); if (!c) return;
+    send("bpc " + c.dataset.l + " " + c.dataset.t);
+  });
+  $("bpTrack").addEventListener("wheel", function (e) { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); this.scrollLeft += e.deltaY; } }, { passive: false });
+  $("bpX").addEventListener("click", function (e) { e.stopPropagation(); send("panelx"); closePanels(true); });
+  $("bpCases").addEventListener("click", function (e) { e.stopPropagation(); send("bpcase"); });
+
+  /* ---------------- кейси ---------------- */
+  var csPrizes = [], csBusy = false;
+  function csItem(p, i) {
+    var r = rew(p[0], p[1]), rr = rarity(p[0], p[1]);
+    return '<div class="cs-item r' + rr + '"' + (i != null ? ' data-i="' + i + '"' : "") + '><i class="gi" style="--i:url(img/' + r.img + '.svg)"></i><b>' + esc(r.name) + '</b><small>' + r.sub + '</small></div>';
+  }
+  function csLeft(n) { $("csLeft").textContent = "Залишилось " + n + " шт."; $("csOpen").disabled = !(+n > 0); $("csOpen").textContent = +n > 0 ? "Відкрити" : "Немає кейсів"; }
+  on("case", function (d) {
+    var p = d.split("|");
+    if (!csBusy && $("cs").classList.contains("hidden")) closePanels(true);
+    csPrizes = p[2].split(";").map(function (x) { return x.split(":"); });
+    $("csNext").textContent = "Наступний безкоштовний: " + p[1] + " хв у грі";
+    var sorted = csPrizes.map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) { return (rarity(b.x[0], b.x[1]) - rarity(a.x[0], a.x[1])) || (a.x[2] - b.x[2]); });
+    $("csList").innerHTML = sorted.map(function (o) { return csItem(o.x); }).join("");
+    if (!csBusy) { csLeft(p[0]); show($("csRoll"), false); show($("csWin"), false); $("csStage").querySelector(".cs-chest").style.visibility = ""; }
+    show($("cs"), true);
+    document.body.classList.add("cs-open");
+    syncFocus();
+  });
+  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csBusy = true; this.disabled = true; $("csStage").classList.add("shake"); send("caseopen"); });
+  on("caseroll", function (d) {
+    var p = d.split("|"), w = +p[0], N = 46, WIN = 40, items = [];
+    // смуга: випадкові призи за вагою, виграш на позиції WIN
+    var tot = csPrizes.reduce(function (s, x) { return s + (+x[2]); }, 0);
+    for (var k = 0; k < N; k++) {
+      var idx = w;
+      if (k !== WIN) { var r = Math.random() * tot; for (var j = 0; j < csPrizes.length; j++) { r -= +csPrizes[j][2]; if (r < 0) { idx = j; break; } } }
+      items.push(csItem(csPrizes[idx]));
+    }
+    var strip = $("csStrip");
+    strip.innerHTML = items.join("");
+    strip.style.transition = "none"; strip.style.transform = "translateX(0)";
+    setTimeout(function () {
+      $("csStage").classList.remove("shake");
+      $("csStage").querySelector(".cs-chest").style.visibility = "hidden";
+      show($("csRoll"), true);
+      var it = strip.children[WIN], step = it.offsetWidth + parseFloat(getComputedStyle(strip).gap || 0);
+      var off = WIN * step + it.offsetWidth / 2 + (Math.random() - .5) * it.offsetWidth * .6;
+      requestAnimationFrame(function () {
+        strip.style.transition = "transform 5.4s cubic-bezier(.08,.6,.12,1)";
+        strip.style.transform = "translateX(" + (-off) + "px)";
+      });
+      setTimeout(function () {
+        $("csWCard").innerHTML = csItem(csPrizes[w]);
+        show($("csWin"), true);
+        csBusy = false;
+        csLeft(p[1]);
+      }, 5700);
+    }, 900);
+  });
+  $("csOk").addEventListener("click", function (e) { e.stopPropagation(); show($("csWin"), false); show($("csRoll"), false); $("csStage").querySelector(".cs-chest").style.visibility = ""; });
+  $("csX").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy) return; send("panelx"); closePanels(true); });
+
+  /* ---------------- гарячі клавіші (B / P / I) ---------------- */
+  // браузер слухає клавіші завжди (cef_always_listen_keys), тому стежимо, чи відкрито чат гри (T/F6 ... Enter/Esc)
+  var chatOpen = false, lastHot = 0;
+  function hotKey(e) {
+    var c = e.keyCode || e.which;
+    if (c === 84 || c === 117 || c === 192) { if (!dlg && !anyPanel()) chatOpen = true; return false; }    // T, F6, ~
+    if (c === 13 || c === 27) { chatOpen = false; return false; }
+    if (chatOpen || dlg) return false;
+    var t = document.activeElement; if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return false;
+    var k = c === 66 ? "b" : c === 80 ? "p" : c === 73 ? "i" : "";
+    if (!k || e.repeat || e.ctrlKey || e.altKey) return false;
+    if (Date.now() - lastHot < 350) return true;
+    lastHot = Date.now();
+    if (csBusy) return true;
+    send("key " + k);
+    return true;
+  }
+  function anyPanel() { return ["phone", "inv", "bp", "cs"].some(function (id) { return !$(id).classList.contains("hidden"); }); }
   on("panel", function () { closePanels(true); });
 
   /* ---------------- клавіатура ---------------- */
   document.addEventListener("keydown", function (e) {
+    if (hotKey(e)) { e.preventDefault(); return; }
     if (dlg) {
       if (e.key === "Enter") { e.preventDefault(); respond(1); }
       else if (e.key === "Escape") { e.preventDefault(); respond(0); }
@@ -469,6 +598,8 @@
     if (e.key === "Escape" || e.key === "Backspace") {
       if (!$("phone").classList.contains("hidden")) { send("ph -1"); closePanels(true); }
       else if (!$("inv").classList.contains("hidden")) { send("inv -1"); closePanels(true); }
+      else if (!$("bp").classList.contains("hidden")) { send("panelx"); closePanels(true); }
+      else if (!$("cs").classList.contains("hidden") && !csBusy) { send("panelx"); closePanels(true); }
     }
   });
 
