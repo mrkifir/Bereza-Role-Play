@@ -1,14 +1,13 @@
 {
-  "_comment": "Базова конфігурація Bereza RP Launcher. Усі значення CHANGE_ME замініть на свої. Віддалений маніфест (manifestUrl) може перевизначати блок server.",
   "configVersion": 1,
   "server": {
     "name": "Bereza Role Play",
-    "host": "CHANGE_ME.example.com",
-    "port": 7777,
+    "host": "188.127.241.74",
+    "port": 2406,
     "clientVersion": "0.3.7"
   },
-  "manifestUrl": "https://CHANGE_ME.example.com/launcher/manifest.json",
-  "newsUrl": "https://CHANGE_ME.example.com/launcher/news.json",
+  "manifestUrl": "https://mrkifir.github.io/Bereza-Role-Play/launcher/android.json",
+  "newsUrl": "https://mrkifir.github.io/Bereza-Role-Play/launcher/news.json",
   "statusApiUrl": "",
   "minLauncherVersionCode": 1,
   "siteUrl": "",

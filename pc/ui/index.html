@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><title>Bereza Role Play</title>
+<style>
+/*FONTS*/
+:root{--y:#FFD60A;--y2:#FF9F1C;--b:#2F6FED;--bg:#0F1118;--card:rgba(255,255,255,.05);--line:rgba(255,255,255,.08);--mut:#9AA3B2;--g:#2ECC71;--r:#E5484D}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:#F2F4F8;font:14px "Manrope","Segoe UI",sans-serif;user-select:none;-webkit-font-smoothing:antialiased}
+body{background:
+ radial-gradient(700px 420px at 85% -10%,rgba(255,196,0,.16),transparent 70%),
+ radial-gradient(800px 600px at -10% 110%,rgba(47,111,237,.22),transparent 70%),
+ linear-gradient(115deg,transparent 0 58%,rgba(255,255,255,.025) 58% 64%,transparent 64%),
+ linear-gradient(160deg,#171A26,#0F1118 60%,#0B0D13)}
+.cond{font-family:"Oswald",sans-serif}
+.wrap{position:absolute;inset:0;display:grid;grid-template-rows:76px 1fr 44px;padding:0 34px}
+header{display:flex;align-items:center;gap:22px;border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:14px}
+.mark{width:46px;height:46px;border-radius:12px;background:#14161E;display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);position:relative;overflow:hidden}
+.mark b{font:700 30px "Oswald";color:var(--y);margin-top:-6px}
+.mark i{position:absolute;left:9px;right:9px;bottom:7px;height:6px;background:linear-gradient(var(--b) 50%,var(--y) 50%);border-radius:1px}
+.logo h1{font:700 24px/1 "Oswald";letter-spacing:.06em}
+.logo h1 span{color:var(--y)}
+.logo small{display:block;font:500 11px "Manrope";letter-spacing:.24em;color:var(--mut);margin-top:4px;text-transform:uppercase}
+.srv{margin-left:auto;display:flex;align-items:center;gap:12px;padding:9px 16px;border-radius:12px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.dot{width:10px;height:10px;border-radius:50%;background:#555}
+.dot.on{background:var(--g);box-shadow:0 0 10px var(--g)}
+.dot.off{background:var(--r)}
+.srv b{font:600 16px "Oswald"}
+.srv small{color:var(--mut);font-size:12px}
+main{display:grid;grid-template-columns:1fr 380px;gap:28px;padding:26px 0 18px;min-height:0}
+.hero h2{font:700 44px/1.05 "Oswald";text-transform:uppercase;letter-spacing:.01em}
+.hero h2 em{font-style:normal;background:linear-gradient(180deg,#FFF3B0,var(--y) 55%,#E59B00);-webkit-background-clip:text;color:transparent}
+.hero p{margin-top:10px;color:var(--mut);font-size:15px;max-width:560px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{padding:6px 12px;border-radius:20px;background:rgba(255,214,10,.08);box-shadow:inset 0 0 0 1px rgba(255,214,10,.25);color:#FFE27A;font:500 12px "Manrope"}
+.left{display:flex;flex-direction:column;min-height:0}
+.nh{margin-top:24px;font:600 16px "Oswald";text-transform:uppercase;letter-spacing:.06em;color:#cfd5df}
+.news{margin-top:10px;flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:6px}
+.news::-webkit-scrollbar{width:6px}.news::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:3px}
+.ni{padding:14px 16px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.ni .t{display:flex;align-items:center;gap:10px}
+.ni .t b{font:600 17px "Oswald"}
+.ni .tag{font:600 10px "Manrope";text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:6px;background:var(--b);color:#fff}
+.ni .d{margin-left:auto;color:var(--mut);font-size:12px}
+.ni p{margin-top:6px;color:#C7CDD8;line-height:1.45;font-size:13px}
+.ni.empty{color:var(--mut)}
+.panel{display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));box-shadow:inset 0 0 0 1px var(--line),0 20px 50px rgba(0,0,0,.35)}
+.panel h3{font:600 20px "Oswald";text-transform:uppercase;letter-spacing:.04em}
+label{display:block;font:600 11px "Manrope";letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+input{width:100%;height:44px;padding:0 14px;border-radius:10px;border:0;outline:0;background:#0B0D13;color:#fff;font:600 16px "Manrope";box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+input:focus{box-shadow:inset 0 0 0 2px var(--y)}
+input.bad{box-shadow:inset 0 0 0 2px var(--r)}
+.hint{margin-top:5px;font-size:11px;color:var(--mut)}
+.path{display:flex;gap:8px;align-items:center}
+.path span{flex:1;min-width:0;height:38px;line-height:38px;padding:0 12px;border-radius:10px;background:#0B0D13;color:#C7CDD8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.path span.bad{color:#FF8A8F}
+.btn2{height:38px;padding:0 14px;border:0;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font:600 13px "Manrope";cursor:pointer}
+.btn2:hover{background:rgba(255,255,255,.14)}
+.checks{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.ck{display:flex;align-items:center;gap:8px;color:#C7CDD8}
+.ck i{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:700 11px "Manrope";font-style:normal;color:#0F1118}
+.ck.ok i{background:var(--g)}.ck.no i{background:var(--y)}.ck.err i{background:var(--r);color:#fff}
+.prog{display:none}
+.prog.on{display:block}
+.pbar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#E59B00,var(--y));transition:width .2s}
+.ptxt{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:12px;color:var(--mut)}.ptxt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg{min-height:18px;font-size:13px;color:#FF8A8F;line-height:1.4}
+.msg.ok{color:#8EF3B4}
+.play{margin-top:auto;height:64px;border:0;border-radius:14px;cursor:pointer;font:700 26px "Oswald";letter-spacing:.08em;text-transform:uppercase;color:#14161C;
+ background:linear-gradient(180deg,#FFE36E,var(--y) 45%,#F0B400);box-shadow:0 10px 30px rgba(255,194,26,.35),inset 0 -3px 0 rgba(0,0,0,.15)}
+.play:hover{filter:brightness(1.06)}
+.play:disabled{filter:grayscale(1) brightness(.6);cursor:default;box-shadow:none}
+.play.inst{background:linear-gradient(180deg,#5FD3FF,var(--b));color:#fff;box-shadow:0 10px 30px rgba(47,111,237,.35)}
+footer{display:flex;align-items:center;gap:18px;border-top:1px solid var(--line);color:var(--mut);font-size:12px}
+footer a{color:#C7CDD8;cursor:pointer;text-decoration:none}
+footer a:hover{color:var(--y)}
+footer .v{margin-left:auto}
+</style></head>
+<body>
+<div class="wrap">
+ <header>
+  <div class="logo"><div class="mark"><b>B</b><i></i></div><div><h1>BEREZA <span>ROLE PLAY</span></h1><small>український RP-сервер</small></div></div>
+  <div class="srv" id="srv"><span class="dot" id="sDot"></span><div><b id="sOn">—</b> <small id="sTxt">перевірка сервера…</small></div></div>
+ </header>
+ <main>
+  <section class="left">
+   <div class="hero">
+    <h2>Твоє нове життя<br>у місті <em>Береза</em></h2>
+    <p>Робота, бізнес, фракції, будинки, батлпас і кейси — повністю українською. Натисни «Грати», лаунчер сам усе встановить і підключить до сервера.</p>
+    <div class="chips"><span class="chip">2000+ будинків</span><span class="chip">Батлпас і кейси</span><span class="chip">Поліція · ЗСУ · СБУ · Лікарня</span><span class="chip">Сучасний інтерфейс</span></div>
+   </div>
+   <div class="nh">Новини</div>
+   <div class="news" id="news"><div class="ni empty">Завантаження…</div></div>
+  </section>
+  <aside class="panel">
+   <h3>Вхід у гру</h3>
+   <div><label>Нікнейм</label><input id="nick" maxlength="24" placeholder="Ivan_Petrenko" spellcheck="false"><div class="hint">Формат Ім'я_Прізвище латиницею</div></div>
+   <div><label>Папка з грою</label><div class="path"><span id="gta">—</span><button class="btn2" id="pick">Змінити</button></div></div>
+   <div class="checks" id="checks"></div>
+   <div class="prog" id="prog"><div class="pbar"><i id="pBar"></i></div><div class="ptxt"><span id="pName"></span><span id="pPct"></span></div></div>
+   <div class="msg" id="msg"></div>
+   <button class="play" id="play" disabled>Зачекайте…</button>
+  </aside>
+ </main>
+ <footer><span id="links"></span><span class="v">Лаунчер v{{VERSION}}</span></footer>
+</div>
+<script>
+var $=function(i){return document.getElementById(i)},S={},busy=false;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function err(e){return (e&&e.message)?e.message:String(e)}
+function msg(t,ok){$("msg").textContent=t||"";$("msg").className="msg"+(ok?" ok":"")}
+function mb(n){return (n/1048576).toFixed(n>1e8?0:1)+" МБ"}
+function render(r){
+  S=r;
+  if(r.nick && !$("nick").value) $("nick").value=r.nick;
+  var g=$("gta"); g.textContent=r.gtaOk?r.gta:"Гру не знайдено — вкажіть gta_sa.exe"; g.className=r.gtaOk?"":"bad"; g.title=r.gta||"";
+  var c="";
+  c+=ck(r.gtaOk,"GTA San Andreas",r.gtaOk?"знайдено":"не знайдено",!r.gtaOk);
+  c+=ck(r.sampOk,"Клієнт SA-MP 0.3.7",r.sampOk?"знайдено":"потрібен samp.exe",!r.sampOk);
+  if(r.gtaOk) c+=ck(!r.need||!r.need.length,"Файли сервера",(r.need&&r.need.length)?("треба встановити: "+r.need.join(", ")):"актуальні",false);
+  $("checks").innerHTML=c;
+  var b=$("play");
+  if(!r.gtaOk){b.disabled=false;b.className="play inst";b.textContent="Вказати гру";}
+  else if(!r.sampOk){b.disabled=false;b.className="play inst";b.textContent="Встановити SA-MP";}
+  else if(r.need&&r.need.length){b.disabled=false;b.className="play inst";b.textContent="Встановити";}
+  else {b.disabled=false;b.className="play";b.textContent="Грати";}
+  if(r.error) msg(r.error);
+  var n=r.news||[];
+  $("news").innerHTML=n.length?n.map(function(x){return '<div class="ni"><div class="t">'+(x.tag?'<span class="tag">'+esc(x.tag)+'</span>':'')+'<b>'+esc(x.title)+'</b><span class="d">'+esc(x.date)+'</span></div>'+(x.body?'<p>'+esc(x.body)+'</p>':'')+'</div>'}).join(""):'<div class="ni empty">Новин поки немає.</div>';
+  var L=[];
+  if(r.site)L.push(['Сайт',r.site]);if(r.discord)L.push(['Discord',r.discord]);if(r.telegram)L.push(['Telegram',r.telegram]);if(r.donate)L.push(['Донат',r.donate]);
+  $("links").innerHTML=L.map(function(l,i){return '<a data-u="'+esc(l[1])+'">'+esc(l[0])+'</a>'}).join(" &nbsp;·&nbsp; ")||"Bereza Role Play";
+}
+function ck(ok,name,val,bad){return '<div class="ck '+(ok?"ok":(bad?"err":"no"))+'"><i>'+(ok?"✓":(bad?"!":"↓"))+'</i><span><b>'+esc(name)+'</b> — '+esc(val)+'</span></div>'}
+function load(){ lInit(); }
+window.onInit=function(r){ render(r); };
+function status(){ lStatus(); }
+window.onStatus=function(s){ (function(){
+    $("sDot").className="dot "+(s.ok?"on":"off");
+    $("sOn").textContent=s.ok?(s.players+" / "+s.max):"офлайн";
+    $("sTxt").textContent=s.ok?("онлайн · пінг "+s.ping+" мс"):"сервер недоступний";
+  })();
+};
+$("links").addEventListener("click",function(e){var a=e.target.closest("a");if(a)lOpen(a.dataset.u)});
+$("pick").addEventListener("click",function(){ lPickGta().then(function(p){ if(p) load(); }).catch(function(e){msg(err(e))}); });
+$("nick").addEventListener("input",function(){ this.classList.toggle("bad",!!this.value && !/^[A-Z][a-z]{1,15}_[A-Z][a-z]{1,15}$/.test(this.value)); });
+$("play").addEventListener("click",function(){
+  if(busy) return; msg("");
+  if(!S.gtaOk){ $("pick").click(); return; }
+  if(!S.sampOk){ lOpen("https://sa-mp.mp/downloads/"); msg("Встановіть клієнт SA-MP 0.3.7 (R1 або R3) і перезапустіть лаунчер."); return; }
+  if(S.need&&S.need.length){
+    busy=true; this.disabled=true; this.textContent="Встановлення…"; $("prog").className="prog on";
+    lInstall().catch(function(e){busy=false;msg(err(e));load();});
+    return;
+  }
+  var nk=$("nick").value.trim();
+  this.disabled=true; this.textContent="Запуск…";
+  var b=this;
+  lPlay(nk).then(function(){ msg("Гра запускається. Приємної гри!",true); }).catch(function(e){ b.disabled=false; b.textContent="Грати"; msg(err(e)); $("nick").focus(); });
+});
+window.onProgress=function(p){
+  var pct=p.total>0?Math.min(100,p.done/p.total*100):0;
+  $("pBar").style.width=pct.toFixed(1)+"%";
+  $("pName").textContent=(p.stage==="extract"?"Розпакування: ":"Завантаження: ")+p.pkg+(p.count>1?(" ("+(p.index+1)+"/"+p.count+")"):"");
+  $("pPct").textContent=p.total>0?(mb(p.done)+" / "+mb(p.total)+(p.stage!=="extract"&&p.speed?(" · "+mb(p.speed)+"/с"):"")):"";
+};
+window.onWarn=function(t){msg(t)};
+window.onInstalled=function(r){
+  busy=false; $("prog").className="prog";
+  if(r.error){ msg("Помилка: "+r.error); } else { msg("Усе встановлено! Натисніть «Грати».",true); }
+  load();
+};
+document.addEventListener("keydown",function(e){ if(e.key==="Enter" && !$("play").disabled) $("play").click(); });
+load(); status(); setInterval(status,15000);
+</script>
+</body></html>
