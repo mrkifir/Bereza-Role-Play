@@ -127,7 +127,7 @@ fun ErrorScreen(vm: MainViewModel, onBack: () -> Unit, onOpenDiagnostics: () -> 
         ErrorCode.CHECKSUM -> "Файл пошкоджено під час передачі. Повторіть — лаунчер завантажить його знову. Якщо повторюється — повідомте адміністрацію."
         ErrorCode.USER_ASSETS -> "Вкажіть у налаштуваннях папку з вашою копією GTA San Andreas потрібної версії."
         ErrorCode.STORAGE -> "Перевірте дозвіл на доступ до файлів у налаштуваннях лаунчера."
-        ErrorCode.CLIENT_MISSING -> "Для гри потрібен сумісний Android-клієнт SA-MP, який визначає адміністрація сервера."
+        ErrorCode.CLIENT_MISSING -> "Для гри потрібен SAMP Mobile. Натисніть «Встановити клієнт» нижче, встановіть його і поверніться в лаунчер — кнопка зміниться на «Грати»."
         ErrorCode.CLIENT_SIGNATURE -> "Встановлений клієнт не збігається з офіційним. Видаліть його та встановіть через лаунчер."
         ErrorCode.CLIENT_INSTALL -> "Дозвольте лаунчеру встановлення застосунків і повторіть."
         ErrorCode.LAUNCHER_OUTDATED -> "Завантажте нову версію лаунчера з офіційного сайту проєкту."
@@ -163,7 +163,7 @@ fun ErrorScreen(vm: MainViewModel, onBack: () -> Unit, onOpenDiagnostics: () -> 
             when (e?.error) {
                 ErrorCode.CLIENT_MISSING -> {
                     val url = vm.clientInfoUrl()
-                    if (url.isNotBlank()) PlayButton("Отримати клієнт", PlayVariant.Install) { vm.openUrl(url) }
+                    if (url.isNotBlank()) PlayButton("Встановити клієнт", PlayVariant.Install) { vm.clearError(); vm.openUrl(url); onBack() }
                 }
                 ErrorCode.CLIENT_INSTALL -> PlayButton("Дозволити встановлення", PlayVariant.Install) {
                     ctx.startActivity(vm.unknownSourcesIntent())

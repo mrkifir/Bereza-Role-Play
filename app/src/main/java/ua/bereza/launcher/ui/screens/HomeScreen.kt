@@ -80,8 +80,15 @@ fun HomeScreen(
         BirchBackdrop(Modifier.fillMaxSize())
 
         val playBlock: @Composable () -> Unit = {
-            PrimaryArea(vm, game, install, checking, settings.nickname, onPlay = {
-                if (install.phase.isRunning || install.phase == Phase.AWAITING_CLIENT) onOpenInstall() else vm.primaryAction(ctx)
+            val needClient = game is GameStatus.Installed && !install.phase.isRunning &&
+                client is ClientStatus.NotInstalled && !(client as ClientStatus.NotInstalled).canAutoInstall
+            PrimaryArea(vm, game, install, checking, settings.nickname, needClient, onPlay = {
+                when {
+                    install.phase.isRunning || install.phase == Phase.AWAITING_CLIENT -> onOpenInstall()
+                    // клієнта нема: відкриваємо сторінку клієнта; після встановлення лаунчер сам це помітить (onResume)
+                    needClient && vm.clientInfoUrl().isNotBlank() -> vm.openUrl(vm.clientInfoUrl())
+                    else -> vm.primaryAction(ctx)
+                }
             })
         }
 
@@ -215,6 +222,7 @@ private fun PrimaryArea(
     install: InstallProgress,
     checking: Boolean,
     nickname: String,
+    needClient: Boolean,
     onPlay: () -> Unit,
 ) {
     Column {
@@ -248,6 +256,7 @@ private fun PrimaryArea(
                 PlayVariant.Busy, "Натисніть, щоб переглянути деталі",
             )
             install.phase == Phase.AWAITING_CLIENT -> Triple("Встановити клієнт", PlayVariant.Install, "Останній крок")
+            needClient -> Triple("Встановити клієнт", PlayVariant.Install, "Потрібен SAMP Mobile · після встановлення поверніться сюди")
             checking && game == GameStatus.Unknown -> Triple("Перевірка", PlayVariant.Busy, null)
             else -> when (game) {
                 GameStatus.Unknown -> Triple("Повторити", PlayVariant.Update, "Немає зв'язку")

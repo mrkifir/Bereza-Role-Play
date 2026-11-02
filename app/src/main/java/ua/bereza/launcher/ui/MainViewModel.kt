@@ -207,7 +207,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 return@launch
             }
             if (clientStatus is ClientStatus.NotInstalled && clientStatus.infoUrl.isNotBlank()) {
-                showError(LauncherException(ErrorCode.CLIENT_MISSING, "Встановіть сумісний клієнт SA-MP за посиланням на екрані помилки, потім натисніть «Грати» ще раз."))
+                openUrl(clientStatus.infoUrl)
                 return@launch
             }
             // 5–7: запуск + підключення
