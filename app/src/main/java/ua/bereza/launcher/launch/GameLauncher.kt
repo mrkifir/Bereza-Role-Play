@@ -118,7 +118,7 @@ class ConfigurableClientLauncher(
             ClientStatus.SignatureMismatch -> throw LauncherException(ErrorCode.CLIENT_SIGNATURE, "Встановлений клієнт має інший підпис — можлива підробка. Видаліть його й встановіть через лаунчер.")
             is ClientStatus.Ready -> Unit
         }
-        val pkg = spec!!.packageName
+        val pkg = clients.resolvePackage(spec) ?: spec!!.packageName
 
         val wroteConfig = withContext(Dispatchers.IO) { connector.writeConfigFile(launch, gameDir, params) }
 

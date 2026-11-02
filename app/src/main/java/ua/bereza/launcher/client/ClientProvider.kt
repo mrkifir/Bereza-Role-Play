@@ -44,10 +44,35 @@ class ClientProvider(
 ) {
     private val pm: PackageManager get() = context.packageManager
 
+    /**
+     * Пакет встановленого клієнта: спершу назви з маніфесту (можна кілька через кому),
+     * потім пошук серед встановлених застосунків за назвою (SA-MP / SAMP / Mordor).
+     */
+    fun resolvePackage(spec: ClientSpec?): String? {
+        if (spec == null) return null
+        val names = spec.packageName.split(',', ';', ' ').map { it.trim() }.filter { it.isNotEmpty() }
+        for (n in names) if (packageInfo(n) != null) return n
+        val main = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        @Suppress("DEPRECATION")
+        val apps = runCatching { pm.queryIntentActivities(main, 0) }.getOrDefault(emptyList())
+        val re = Regex("(sa-?mp|mordor)", RegexOption.IGNORE_CASE)
+        for (ri in apps) {
+            val pkg = ri.activityInfo?.packageName ?: continue
+            if (pkg == context.packageName) continue
+            val label = runCatching { ri.loadLabel(pm).toString() }.getOrDefault("")
+            if (re.containsMatchIn(pkg) || re.containsMatchIn(label)) {
+                AppLog.i("Знайдено клієнт SA-MP: $label ($pkg)")
+                return pkg
+            }
+        }
+        return null
+    }
+
     fun status(spec: ClientSpec?): ClientStatus {
         if (spec == null || spec.packageName.isBlank()) return ClientStatus.NotConfigured
         val canAuto = spec.apkUrl.isNotBlank()
-        val info = packageInfo(spec.packageName)
+        val pkg = resolvePackage(spec) ?: return ClientStatus.NotInstalled(canAuto, spec.infoUrl)
+        val info = packageInfo(pkg)
             ?: return ClientStatus.NotInstalled(canAuto, spec.infoUrl)
         if (spec.signingCertSha256.isNotBlank() && !certMatches(info, spec.signingCertSha256)) {
             return ClientStatus.SignatureMismatch
