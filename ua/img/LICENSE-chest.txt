@@ -1,0 +1,2 @@
+chest.png, chest_open.png - rendered from "KayKit: Dungeon Remastered" (chest_gold.glb)
+by Kay Lousberg (www.kaylousberg.com), Creative Commons Zero (CC0).

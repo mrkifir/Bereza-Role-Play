@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Bereza RP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css?v=ua1">
+</head>
+<body>
+
+<!-- ===== Екран входу ===== -->
+<div id="auth" class="hidden">
+  <div class="auth-bg"></div>
+  <div class="auth-brand">
+    <div class="logo">BEREZA<span>RP</span></div>
+    <div class="auth-sub">українська рольова гра</div>
+  </div>
+</div>
+
+<!-- ===== HUD ===== -->
+<div id="hud" class="hidden">
+  <div class="h-top">
+    <div class="h-bars">
+      <div class="h-bar hp"><i class="ic ic-heart"></i><b id="tHp">100%</b><div class="track"><div class="fill" id="bHp"></div></div></div>
+      <div class="h-bar ar hidden" id="arRow"><i class="ic ic-shield"></i><b id="tAr">0%</b><div class="track"><div class="fill" id="bAr"></div></div></div>
+      <div class="h-bar eat"><i class="ic ic-food"></i><b id="tEat">100%</b><div class="track"><div class="fill" id="bEat"></div></div></div>
+    </div>
+    <div class="h-weap" id="hWeap"><i class="gi" id="hWIco" style="--i:url(img/w_fist.svg)"></i><b id="hAmmo"></b></div>
+  </div>
+  <div class="h-money"><span id="hCash">0</span><i>$</i><div id="hDelta"></div></div>
+  <div class="h-bank">банк <b id="hBank">$0</b></div>
+  <div class="h-wanted hidden" id="hWanted"></div>
+</div>
+
+<div id="idCard" class="hidden">
+  <div class="id-logo">B<span>RP</span></div>
+  <div class="id-txt">
+    <div class="id-row"><b class="id-badge">ID: <span id="hId">0</span></b><b class="id-lvl">LVL <span id="hLvl">1</span></b><b class="id-vip hidden" id="hVip">VIP</b></div>
+    <div class="id-name" id="hName">—</div>
+    <div class="id-time" id="hTime">00:00</div>
+  </div>
+</div>
+
+<!-- ===== Чипи: GPS, зелена зона, робоча зміна ===== -->
+<div id="chipGz" class="chip gz hidden">Зелена зона</div>
+<div id="chipGps" class="chip gps hidden"><i class="ic ic-pin"></i><span id="chipGpsT"></span></div>
+<div id="chipShift" class="chip shift hidden"><i class="ic ic-wrench"></i><div><b id="chipShiftJ"></b><small id="chipShiftN"></small></div></div>
+
+<!-- ===== Спідометр ===== -->
+<div id="speedo" class="hidden">
+  <svg viewBox="0 0 200 200" class="gauge">
+    <defs>
+      <linearGradient id="gArc" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#2F6FED"/>
+        <stop offset=".65" stop-color="#FFD60A"/>
+        <stop offset="1" stop-color="#E5484D"/>
+      </linearGradient>
+    </defs>
+    <path class="arc-bg" d="M 38 162 A 80 80 0 1 1 162 162"/>
+    <path class="arc" id="spArc" d="M 38 162 A 80 80 0 1 1 162 162" stroke="url(#gArc)"/>
+    <g id="spTicks"></g>
+  </svg>
+  <div class="sp-center">
+    <div class="sp-num" id="spNum">0</div>
+    <div class="sp-unit">км/год</div>
+    <div class="sp-name" id="spName">—</div>
+  </div>
+  <div class="sp-side">
+    <div class="sp-gauge"><i class="ic ic-fuel"></i><div class="vtrack"><div class="vfill" id="spFuel"></div></div></div>
+    <div class="sp-gauge"><i class="ic ic-wrench"></i><div class="vtrack"><div class="vfill hpfill" id="spHp"></div></div></div>
+  </div>
+  <div class="sp-icons">
+    <i class="ic ic-engine" id="sEng" title="Двигун"></i>
+    <i class="ic ic-light" id="sLig" title="Фари"></i>
+    <i class="ic ic-lock" id="sLock" title="Замок"></i>
+    <i class="ic ic-belt" id="sBelt" title="Пасок"></i>
+  </div>
+</div>
+
+<!-- ===== Діалог ===== -->
+<div id="dlgWrap" class="hidden">
+  <div class="dlg" id="dlg">
+    <div class="dlg-head"><div class="dlg-title" id="dTitle"></div><button class="x" id="dX" aria-label="Закрити">×</button></div>
+    <div class="dlg-body" id="dBody"></div>
+    <div class="dlg-list hidden" id="dList"></div>
+    <div class="dlg-input hidden" id="dInWrap">
+      <input id="dIn" type="text" maxlength="127" autocomplete="off" spellcheck="false">
+      <button class="eye hidden" id="dEye" type="button" aria-label="Показати пароль"><i class="ic ic-eye"></i></button>
+    </div>
+    <div class="dlg-btns">
+      <button class="btn ghost" id="dB2"></button>
+      <button class="btn primary" id="dB1"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Телефон ===== -->
+<div id="phone" class="hidden">
+  <div class="ph-frame">
+    <div class="ph-screen">
+      <div class="ph-status"><span id="pTime">00:00</span><span class="ph-notch"></span><span class="ph-net">LTE <i class="ic ic-bat"></i></span></div>
+      <div class="ph-clock" id="pClock">00:00</div>
+      <div class="ph-date" id="pDate">01.01.2026</div>
+      <div class="ph-card">
+        <div><small>Власник</small><b id="pName">—</b></div>
+        <div><small>Номер</small><b id="pNum">—</b></div>
+        <div><small>Рахунок</small><b id="pBank">$0</b></div>
+      </div>
+      <div class="ph-grid" id="pGrid"></div>
+      <button class="ph-home" id="pHome" aria-label="Закрити"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Інвентар ===== -->
+<div id="inv" class="hidden">
+  <div class="iv-bg"></div>
+  <div class="iv-l">
+    <div class="iv-head"><button class="iv-x" id="iX" aria-label="Закрити"></button><h1>Інвентар</h1></div>
+    <div class="iv-body">
+      <div class="iv-eq" id="iEqL"></div>
+      <div class="iv-char" id="iChar"><svg class="iv-sil" viewBox="0 0 200 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="silg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4a52"/><stop offset="1" stop-color="#26262b"/></linearGradient></defs><g fill="url(#silg)" stroke="rgba(255,255,255,.10)" stroke-width="2"><circle cx="100" cy="52" r="34"/><path d="M84 84h32v14H84z"/><path d="M58 100c-18 4-28 16-30 34l-12 120c-1 9 4 15 11 16s13-4 14-12l12-104 4 0 -4 130 0 96 6 108c1 10 8 16 17 16s15-7 15-16l2-150h14l2 150c0 9 6 16 15 16s16-6 17-16l6-108 0-96-4-130 4 0 12 104c1 8 7 13 14 12s12-7 11-16l-12-120c-2-18-12-30-30-34z"/></g></svg><div class="iv-skin" id="iSkin"></div></div>
+      <div class="iv-eq" id="iEqR"></div>
+    </div>
+    <div class="iv-stats">
+      <div><small>Готівка</small><b id="iCash">$0</b></div>
+      <div><small>Банк</small><b id="iBank">$0</b></div>
+      <div class="w"><small>Вага речей</small><b><span id="iW">0</span> / 60 кг</b><div class="wbar"><i id="iWBar"></i></div></div>
+    </div>
+  </div>
+  <div class="iv-sep"></div>
+  <div class="iv-r">
+    <div class="iv-cap">Ваші речі <span>(натисніть на предмет, щоб взаємодіяти)</span></div>
+    <div class="iv-tabs" id="iTabs">
+      <button data-t="all" class="on">Усе</button><button data-t="wear">Одяг</button><button data-t="docs">Документи</button><button data-t="more">Додатково</button>
+    </div>
+    <div class="iv-box"><div class="iv-grid" id="iGrid"></div></div>
+    <div class="iv-hint">ESC — закрити · <a id="iList">старе меню</a></div>
+  </div>
+  <div class="iv-menu hidden" id="iMenu">
+    <div class="m-head"><i class="gi" id="mIco"></i><div><b id="mName"></b><small id="mQ"></small></div></div>
+    <p id="mDesc"></p>
+    <button id="aUse">Використати</button><button id="aDrop">Викинути</button><button id="aGive">Передати</button>
+  </div>
+</div>
+
+<div id="doc" class="hidden"></div>
+
+
+<!-- ===== Батлпас ===== -->
+<div id="bp" class="hidden">
+  <div class="bp-bg"></div>
+  <div class="bp-wrap">
+    <div class="bp-top">
+      <button class="iv-x" id="bpX" aria-label="Закрити"></button>
+      <div class="bp-title"><h1>Батлпас</h1><span>Сезон 1 · «Осінь у Березі»</span></div>
+      <div class="bp-lvl"><div class="bp-ring"><b id="bpLvl">0</b><small>рівень</small></div>
+        <div class="bp-xp"><div class="bp-xpt"><span>Досвід рівня</span><b id="bpXpT">0 / 150</b></div><div class="bp-bar"><i id="bpBar"></i></div></div></div>
+      <button class="bp-chip bz" id="bpDon"><i class="gi" style="--i:url(img/coin.svg)"></i><span><b id="bpBz">0</b> BC</span></button><button class="bp-chip" id="bpCases"><i class="gi" style="--i:url(img/box.svg)"></i><span>Кейси: <b id="bpCaseN">0</b></span></button>
+    </div>
+    <div class="bp-trackbox">
+      <div class="bp-rowlbl"><span>Звичайний</span><span class="p">Преміум</span></div>
+      <div class="bp-track" id="bpTrack"></div>
+    </div>
+    <div class="bp-bottom">
+      <div class="bp-tasks"><div class="bp-h">Завдання дня <small>будь-які 4 = $5 000 + кейс · кожне +60 досвіду</small></div><div id="bpTasks"></div><div class="bp-bonus" id="bpBonus"></div></div>
+      <div class="bp-prem" id="bpPrem"></div>
+    </div>
+    <div class="iv-hint">B або ESC — закрити · досвід: завдання (60), преміум-завдання (120), 1 хв у грі (1)</div>
+  </div>
+</div>
+
+<!-- ===== Кейси ===== -->
+<div id="cs" class="hidden">
+  <div class="cs-bg"></div>
+  <button class="iv-x cs-x" id="csX" aria-label="Закрити"></button>
+  <div class="cs-wrap">
+    <div class="cs-banner"><div><b>Кейс Берези</b><small id="csNext">Наступний безкоштовний: — хв</small></div><i class="gi" style="--i:url(img/box.svg)"></i></div>
+    <div class="cs-sub">Ви відкриваєте кейс</div>
+    <div class="cs-name">Березовий</div>
+    <div class="cs-stage" id="csStage"><div class="cs-glow"></div><div class="cs-rays" id="csRays"></div><div class="cs-chest" id="csImg"></div><div class="cs-fx" id="csFx"></div>
+      <div class="cs-roll hidden" id="csRoll"><div class="cs-strip" id="csStrip"></div><div class="cs-mark"></div></div>
+    </div>
+    <div class="cs-btns"><button class="cs-open" id="csOpen">Відкрити</button><button class="cs-open cs-quick" id="csQuick" title="Без анімації">Швидко ⚡</button></div>
+    <div class="cs-left" id="csLeft">Залишилось 0 шт.</div>
+  </div>
+  <div class="cs-prizes"><div class="cs-ph">Що можна виграти?</div><div class="cs-list" id="csList"></div></div>
+  <div class="cs-win hidden" id="csWin"><div class="cs-wcard" id="csWCard"></div><button class="cs-open" id="csOk">Забрати</button></div>
+</div>
+
+<div id="toast"></div>
+
+<script src="app.js?v=ua1"></script>
+</body>
+</html>

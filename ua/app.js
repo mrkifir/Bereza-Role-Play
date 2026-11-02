@@ -1,0 +1,666 @@
+/* Bereza RP — CEF інтерфейс. Події від сервера: cef.on(name, data); відповіді: cef.emit("br", "...") */
+(function () {
+  "use strict";
+  var SEP = "\x01";
+  var $ = function (id) { return document.getElementById(id); };
+  var live = typeof window.cef !== "undefined";
+  var handlers = {};
+  var bridge = live ? window.cef : {
+    on: function (n, f) { (handlers[n] = handlers[n] || []).push(f); },
+    emit: function () { console.log("emit", [].slice.call(arguments).join(" ")); }
+  };
+  if (!live) { document.documentElement.classList.add("preview"); window.__fire = function (n, d) { (handlers[n] || []).forEach(function (f) { f(d); }); }; }
+  // фокус (курсор + клавіатура) — тримаємо, поки відкрито діалог, телефон або інвентар
+  function syncFocus() {
+    var want = !!dlg || ["phone", "inv", "bp", "cs"].some(function (id) { return !$(id).classList.contains("hidden"); });
+    if (live && bridge.set_focus) bridge.set_focus(want);
+  }
+  var unfocus = syncFocus;
+
+  function send(s) { bridge.emit("br", s); }
+  function show(el, on) { el.classList.toggle("hidden", !on); }
+  function money(n) { n = parseInt(n, 10) || 0; return (n < 0 ? "-$" : "$") + Math.abs(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  // SA-MP кольори {RRGGBB} -> <span>
+  function samp(s) {
+    var out = "", open = false, re = /\{([0-9a-fA-F]{6})\}/g, last = 0, m;
+    while ((m = re.exec(s))) {
+      out += esc(s.slice(last, m.index));
+      if (open) out += "</span>";
+      out += '<span style="color:#' + m[1] + '">';
+      open = true; last = re.lastIndex;
+    }
+    out += esc(s.slice(last));
+    if (open) out += "</span>";
+    return out;
+  }
+  function plain(s) { return s.replace(/\{[0-9a-fA-F]{6}\}/g, ""); }
+
+  /* ---------------- стан ---------------- */
+  var on = function (name, fn) { bridge.on(name, function (d) { try { fn(d == null ? "" : String(d)); } catch (e) { console.error(e); } }); };
+
+  // стандартний HUD GTA (гроші, зброя, здоров'я, годинник, зірки, назви) — ховаємо, бо є свій
+  var gtaHidden = null;
+  function gtaHud(visible) {
+    if (!live || gtaHidden === !visible) return;
+    gtaHidden = !visible;
+    ["interface", "vehicle_name", "area_name"].forEach(function (c) { bridge.emit("game:hud:setComponentVisible", c, visible); });
+  }
+  on("reset", function (d) {
+    document.body.classList.toggle("off", d !== "1");
+    // UA: стандартний HUD GTA не ховаємо
+    if (d !== "1") { closeDialog(); closePanels(); }
+  });
+  on("auth", function (d) {
+    var a = d === "1";
+    show($("auth"), a);
+    document.body.classList.toggle("authmode", a);
+    show($("hud"), !a);
+  });
+
+  /* ---------------- HUD ---------------- */
+  var lastCash = null;
+  on("hud", function (d) {
+    var p = d.split("|");
+    // HUD приходить лише після входу - ховаємо екран входу
+    show($("auth"), false);
+    document.body.classList.remove("authmode");
+    show($("hud"), true); show($("idCard"), true);
+    $("hCash").textContent = money(p[0]).replace("$", "");
+    $("hBank").textContent = money(p[1]);
+    $("hLvl").textContent = p[2];
+    show($("hVip"), p[3] === "1");
+    var eat = Math.max(0, Math.min(100, +p[4])), hp = Math.max(0, Math.min(100, +p[6])), ar = Math.max(0, Math.min(100, +p[7])), w = +p[8];
+    $("bEat").style.width = eat + "%"; $("tEat").textContent = eat + "%";
+    $("bEat").parentNode.parentNode.classList.toggle("low", eat < 25);
+    $("bHp").style.width = hp + "%"; $("tHp").textContent = hp + "%";
+    $("bAr").style.width = ar + "%"; $("tAr").textContent = ar + "%";
+    show($("arRow"), ar > 0);
+    var now = new Date(), dd = ("0" + now.getDate()).slice(-2) + "." + ("0" + (now.getMonth() + 1)).slice(-2) + "." + now.getFullYear();
+    $("hTime").textContent = dd + " " + p[9];
+    $("hName").textContent = p[10] || "";
+    $("hId").textContent = p[11];
+    var wl = $("hWanted");
+    show(wl, w > 0);
+    wl.textContent = w > 0 ? "★★★★★★".slice(0, w) : "";
+    lastCash = +p[0];
+    var wid = +p[12] || 0, ammo = +p[13] || 0;
+    $("hWIco").style.setProperty("--i", "url(img/" + weapIco(wid) + ".svg)");
+    $("hAmmo").textContent = (wid >= 16 && wid <= 43 && wid !== 40) ? ammo : "";
+    $("hWeap").title = WEAP[wid] || "Кулаки";
+    gtaHud(false);
+  });
+  function weapIco(w) {
+    if (!w) return "w_fist";
+    if (w === 4 || w === 8 || w === 9) return "w_knife";
+    if (w <= 15) return "w_melee";
+    if (w <= 18 || w === 39) return "w_grenade";
+    if (w <= 24) return "w_pistol";
+    if (w <= 27) return "w_shotgun";
+    if (w === 28 || w === 29 || w === 32) return "w_smg";
+    if (w === 30 || w === 31) return "w_rifle";
+    if (w === 33 || w === 34) return "w_sniper";
+    return "w_rifle";
+  }
+  var WEAP = {1:"Кастет",2:"Ключка",3:"Кийок",4:"Ніж",5:"Біта",6:"Лопата",7:"Кий",8:"Катана",9:"Бензопила",10:"Дилдо",11:"Дилдо",12:"Вібратор",13:"Вібратор",14:"Квіти",15:"Тростина",
+    16:"Граната",17:"Сльозогінний газ",18:"Коктейль Молотова",22:"Пістолет",23:"Пістолет з глушником",24:"Desert Eagle",25:"Дробовик",26:"Обріз",27:"Бойовий дробовик",28:"Micro Uzi",29:"MP5",
+    30:"АК-47",31:"M4",32:"Tec-9",33:"Гвинтівка",34:"Снайперська гвинтівка",35:"РПГ",36:"Ракетниця",37:"Вогнемет",38:"Мініган",39:"Сумка C4",40:"Детонатор",41:"Балончик",42:"Вогнегасник",43:"Фотоапарат",44:"ПНБ",45:"Тепловізор",46:"Парашут"};
+
+  /* ---------------- чипи ---------------- */
+  // chip|k|on|текст   k: 0 GPS, 1 зміна, 2 зелена зона
+  on("chip", function (d) {
+    var p = d.split("|"), k = +p[0], vis = p[1] === "1", t = p.slice(2).join("|");
+    if (k === 0) { show($("chipGps"), vis); if (vis && t) $("chipGpsT").textContent = t; }
+    else if (k === 1) { show($("chipShift"), vis); if (vis && t) { var q = t.split("~"); $("chipShiftJ").textContent = q[0]; $("chipShiftN").textContent = q[1] || ""; } }
+    else show($("chipGz"), vis);
+  });
+  var deltaT;
+  on("money", function (d) {
+    var n = +d, el = $("hDelta");
+    el.className = ""; void el.offsetWidth;
+    el.textContent = (n > 0 ? "+" : "−") + money(Math.abs(n));
+    el.className = "show " + (n > 0 ? "plus" : "minus");
+    clearTimeout(deltaT);
+    deltaT = setTimeout(function () { el.className = ""; }, 2700);
+  });
+
+  /* ---------------- спідометр ---------------- */
+  var arc = $("spArc"), arcLen = 0, MAXS = 240;
+  (function ticks() {
+    var g = $("spTicks"), ns = "http://www.w3.org/2000/svg";
+    // дуга 270°: від 135° до 405° (0 = вправо), центр 100,100, r 80
+    for (var v = 0; v <= MAXS; v += 20) {
+      var a = (135 + 270 * v / MAXS) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+      var big = v % 40 === 0, l = document.createElementNS(ns, "line");
+      l.setAttribute("x1", 100 + c * 66); l.setAttribute("y1", 100 + s * 66);
+      l.setAttribute("x2", 100 + c * (big ? 59 : 62)); l.setAttribute("y2", 100 + s * (big ? 59 : 62));
+      g.appendChild(l);
+    }
+  })();
+  function setSpeed(v) {
+    if (!arcLen) { arcLen = arc.getTotalLength(); arc.style.strokeDasharray = arcLen; }
+    var k = Math.max(0, Math.min(1, v / MAXS));
+    arc.style.strokeDashoffset = arcLen * (1 - k);
+    $("spNum").textContent = v;
+    $("spNum").classList.toggle("fast", v >= 160);
+  }
+  on("spdon", function (d) {
+    document.body.classList.add("driving");
+    var p = d.split("|");
+    $("spName").textContent = p[0];
+    $("speedo").classList.toggle("bike", p[1] === "1");
+    show($("speedo"), true);
+  });
+  on("spdoff", function () { show($("speedo"), false); document.body.classList.remove("driving"); });
+  on("spd", function (d) {
+    var p = d.split("|").map(Number);
+    show($("speedo"), true);
+    setSpeed(p[0]);
+    var f = $("spFuel"), h = $("spHp");
+    f.style.height = Math.max(0, Math.min(100, p[1])) + "%"; f.classList.toggle("low", p[1] < 15);
+    h.style.height = Math.max(0, Math.min(100, p[2])) + "%"; h.classList.toggle("low", p[2] < 35);
+    $("sEng").classList.toggle("on", p[3] === 1);
+    $("sLig").classList.toggle("on", p[4] === 1);
+    $("sLock").classList.toggle("on", p[5] === 1);
+    $("sBelt").classList.toggle("on", p[6] === 1);
+  });
+
+  /* ---------------- діалоги ---------------- */
+  var dlg = null; // {id, style, items:[], sel}
+  function closeDialog() { dlg = null; show($("dlgWrap"), false); unfocus(); }
+  on("dlgclose", closeDialog);
+  on("dlg", function (d) {
+    var p = d.split(SEP);
+    var id = +p[0], style = +p[1], authScr = p[2] === "1", title = p[3] || "", b1 = p[4] || "", b2 = p[5] || "", body = p.slice(6).join(SEP);
+    closePanels(true);
+    dlg = { id: id, style: style, items: [], sel: 0 };
+    $("dTitle").innerHTML = samp(title);
+    var list = style === 2 || style === 4 || style === 5;
+    var input = style === 1 || style === 3;
+    $("dlg").classList.toggle("wide", style === 4 || style === 5);
+    $("dBody").innerHTML = list ? "" : samp(body).replace(/\t/g, "    ");
+    show($("dList"), list);
+    show($("dInWrap"), input);
+    show($("dEye"), style === 3);
+    $("dEye").classList.remove("on");
+    $("dIn").type = style === 3 ? "password" : "text";
+    $("dIn").value = "";
+    $("dB1").innerHTML = samp(b1);
+    $("dB2").innerHTML = samp(b2);
+    show($("dB1"), b1.length > 0);
+    show($("dB2"), b2.length > 0);
+    if (authScr) { show($("auth"), true); document.body.classList.add("authmode"); show($("hud"), false); }
+
+    if (list) {
+      var L = $("dList"); L.innerHTML = "";
+      var rows = body.split("\n");
+      if (rows.length && rows[rows.length - 1] === "") rows.pop();
+      if (style === 5 && rows.length) {
+        L.appendChild(makeRow(rows.shift(), -1, true));
+      }
+      rows.forEach(function (r, i) { dlg.items.push(r); L.appendChild(makeRow(r, i, false)); });
+      select(0);
+    }
+    show($("dlgWrap"), true);
+    syncFocus();
+    if (input) setTimeout(function () { $("dIn").focus(); }, 30);
+  });
+  function makeRow(text, i, head) {
+    var row = document.createElement("div");
+    row.className = "row" + (head ? " head" : "");
+    var cols = text.split("\t");
+    cols.forEach(function (c, k) {
+      var s = document.createElement("div"); s.className = "dcol";
+      // звичайний список: нумерація [1], [2] ... (якщо пункт ще не має номера)
+      var num = (!head && k === 0 && dlg && dlg.style === 2 && !/^\s*(\{[0-9a-fA-F]{6}\})?\s*\[/.test(c)) ? '<span class="num">[' + (i + 1) + ']</span> ' : "";
+      s.innerHTML = num + samp(c); row.appendChild(s);
+    });
+    if (!head) {
+      row.dataset.i = i;
+      row.addEventListener("click", function () { select(i); });
+      row.addEventListener("dblclick", function () { select(i); respond(1); });
+    }
+    return row;
+  }
+  function select(i) {
+    if (!dlg || !dlg.items.length) return;
+    dlg.sel = (i + dlg.items.length) % dlg.items.length;
+    var rows = $("dList").querySelectorAll(".row:not(.head)");
+    rows.forEach(function (r, k) { r.classList.toggle("sel", k === dlg.sel); });
+    var el = rows[dlg.sel]; if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+  }
+  function respond(r) {
+    if (!dlg) return;
+    var item = -1, text = "";
+    if (dlg.style === 2 || dlg.style === 4 || dlg.style === 5) {
+      item = dlg.sel;
+      text = plain((dlg.items[item] || "").split("\t")[0]);
+    } else if (dlg.style === 1 || dlg.style === 3) {
+      text = $("dIn").value.replace(/[\r\n]/g, " ").slice(0, 127);
+    }
+    var id = dlg.id;
+    closeDialog();
+    send("dlg " + id + " " + r + " " + item + " " + text);
+  }
+  $("dB1").addEventListener("click", function () { respond(1); });
+  $("dB2").addEventListener("click", function () { respond(0); });
+  $("dX").addEventListener("click", function () { respond(0); });
+  $("dEye").addEventListener("click", function () {
+    var i = $("dIn"), v = i.type === "password";
+    i.type = v ? "text" : "password"; this.classList.toggle("on", v); i.focus();
+  });
+
+  /* ---------------- телефон ---------------- */
+  var APPS = [
+    ["Дзвінок", "📞", "#34C759"], ["SMS", "💬", "#0A84FF"], ["Банк", "🏦", "#FFB300"],
+    ["GPS", "🧭", "#FF453A"], ["Таксі", "🚕", "#FFCC00"], ["Механік", "🔧", "#8E6E53"],
+    ["Квести", "⭐", "#BF5AF2"], ["Профіль", "👤", "#30B0C7"], ["Оголошення", "📢", "#FF6B3D"],
+    ["Мої авто", "🚗", "#5E5CE6"], ["Мій номер", "#", "#636366"], ["Налаштування", "⚙️", "#48484A"]
+  ];
+  (function buildPhone() {
+    var g = $("pGrid");
+    APPS.forEach(function (a, i) {
+      var b = document.createElement("button");
+      b.className = "app";
+      b.innerHTML = '<span class="tile" style="background:linear-gradient(160deg,' + a[2] + ',' + shade(a[2]) + ')">' + a[1] + "</span>" + a[0];
+      b.addEventListener("click", function () { send("ph " + i); closePanels(true); });
+      g.appendChild(b);
+    });
+  })();
+  function shade(hex) {
+    var n = parseInt(hex.slice(1), 16), r = (n >> 16) * .72 | 0, g = ((n >> 8) & 255) * .72 | 0, b = (n & 255) * .72 | 0;
+    return "rgb(" + r + "," + g + "," + b + ")";
+  }
+  on("phone", function (d) {
+    var p = d.split("|");
+    closePanels(true);
+    $("pTime").textContent = p[0]; $("pClock").textContent = p[0]; $("pDate").textContent = p[1];
+    $("pName").textContent = p[2]; $("pNum").textContent = p[3] && p[3] !== "0" ? p[3] : "—"; $("pBank").textContent = money(p[5]);
+    show($("phone"), true);
+    document.body.classList.add("phone-open");
+    syncFocus();
+  });
+  $("pHome").addEventListener("click", function () { send("ph -1"); closePanels(true); });
+
+  /* ---------------- інвентар ---------------- */
+  // [назва, іконка, вага кг, опис, можна викинути/передати, колір]
+  var ITEMS = [
+    ["Телефон", "phone", 0.2, "Дзвінки та SMS: /call, /sms, /p — відповісти.", 0, "#6FA8FF"],
+    ["Паспорт", "passport", 0.05, "Статистика персонажа. Показати іншому: /pass [id].", 0, "#6FA8FF"],
+    ["Ліцензії", "lic", 0.02, "Ваші ліцензії. Показати іншому: /lic [id].", 0, "#6FA8FF"],
+    ["Аптечка", "medkit", 0.5, "Відновлює здоров'я (/healme).", 0, "#FF5A6A"],
+    ["Наркотики", "leaf", 0.01, "Грами. Використати: /usedrugs.", 0, "#9ACD32"],
+    ["Матеріали", "box", 0.01, "Для виготовлення зброї (банди, мафії).", 0, "#C9B79C"],
+    ["Маска", "glasses", 0.1, "Приховує обличчя (/mask).", 0, "#AFAFAF"],
+    ["Наживка", "bandage", 0.01, "Черв'яки для рибалки.", 0, "#FFB547"],
+    ["Відмичка", "repair", 0.3, "Для угону транспорту.", 0, "#FFC94D"],
+    ["Вудка", "rod", 1.2, "Рибалка на пірсі.", 0, "#4FD1C5"],
+    ["Риба", "fish", 1, "Улов, кг. Продати — у магазині.", 0, "#4FD1C5"],
+    ["Гроші", "money", 0, "Готівка в кишені. Передати: /pay [id] [сума].", 0, "#5BE38E"]
+  ];
+
+  var MAXW = 60, SLOTS = 42, inv = null, tab = "all", selKey = null;
+  function gi(name, extra) { return '<i class="gi" style="--i:url(img/' + name + '.svg)"></i>' + (extra || ""); }
+  function setGi(el, name) { el.style.setProperty("--i", "url(img/" + name + ".svg)"); }
+  function cnt(i) { return inv ? (+inv[2 + i] || 0) : 0; }
+  function accOn() { return inv && inv[17] === "1"; }
+  function weight() { var w = 0; ITEMS.forEach(function (it, i) { if (i !== 11) w += it[2] * cnt(i); }); return w; }
+  function cellsFor(t) {
+    var out = [];
+    if (t === "all") ITEMS.forEach(function (it, i) { if (cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
+    else if (t === "docs") [1, 2].forEach(function (i) { if (cnt(i) > 0) out.push({ k: "i" + i, i: i }); });
+    else if (t === "wear") {
+      out.push({ k: "skin", img: "shirt", name: "Одяг", desc: "Скін #" + inv[14] + ". Змінити — у магазині одягу (/gps).", q: "" });
+      if (+inv[15]) out.push({ k: "hat", img: "cap", name: "Головний убір", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: accOn() ? "вдягнуто" : "знято", acc: 1 });
+      if (+inv[16]) out.push({ k: "gl", img: "glasses", name: "Окуляри", desc: "Аксесуар. «Використати» — зняти або вдягнути.", q: accOn() ? "вдягнуто" : "знято", acc: 1 });
+    } else {
+      out.push({ k: "cash", info: 1, img: "money", name: "Готівка", v: money(inv[0]) });
+      out.push({ k: "bank", info: 1, img: "lock", name: "Банк", v: money(inv[1]) });
+      out.push({ k: "w", info: 1, img: "bag", name: "Вага", v: weight().toFixed(1) + " кг" });
+    }
+    return out;
+  }
+  function eqCell(img, on, label, act) {
+    return '<div class="eq' + (on ? "" : " off") + (act ? " click" : "") + '"' + (act ? ' data-act="' + act + '"' : "") + ">" + gi(img) + "<small>" + label + "</small></div>";
+  }
+  function render() {
+    var g = $("iGrid"), cells = cellsFor(tab);
+    g.innerHTML = "";
+    if (selKey && !cells.some(function (c) { return c.k === selKey; })) { selKey = null; closeMenu(); }
+    var n = Math.max(SLOTS, Math.ceil(cells.length / 7) * 7);
+    for (var k = 0; k < n; k++) {
+      var c = cells[k], b = document.createElement("button");
+      if (!c) { b.className = "cell empty"; g.appendChild(b); continue; }
+      if (c.info) {
+        b.className = "cell info";
+        b.innerHTML = "<div><small>" + c.name + "</small><b>" + c.v + "</b></div>" + gi(c.img);
+      } else {
+        var img = c.i != null ? ITEMS[c.i][1] : c.img, q = c.i != null ? (c.i === 11 ? "" : cnt(c.i)) : "";
+        b.className = "cell" + (c.k === selKey ? " sel" : "");
+        b.innerHTML = gi(img) + '<span class="q">' + q + "</span>";
+        (function (cc, el) {
+          el.addEventListener("click", function (e) { e.stopPropagation(); selKey = cc.k; render(); openMenu(cc, $("iGrid").querySelector(".cell.sel")); });
+          el.addEventListener("dblclick", function () { selKey = cc.k; doUse(); });
+        })(c, b);
+      }
+      g.appendChild(b);
+    }
+    var hat = +inv[15], gl = +inv[16];
+    $("iEqL").innerHTML = eqCell("cap", hat && accOn(), "Голова", hat ? "acc" : "") + eqCell("glasses", gl && accOn(), "Окуляри", gl ? "acc" : "") +
+      eqCell("shirt", 1, "Верх") + eqCell("jeans", 1, "Низ") + eqCell("shoe", 1, "Взуття");
+    $("iEqR").innerHTML = eqCell("phone", cnt(0) > 0, "Телефон", cnt(0) ? "u0" : "") + eqCell("passport", cnt(1) > 0, "Паспорт", cnt(1) ? "u1" : "") +
+      eqCell("lic", cnt(2) > 0, "Ліцензії", cnt(2) ? "u2" : "") + eqCell("rod", cnt(9) > 0, "Вудка") + eqCell("medkit", cnt(3) > 0, "Аптечка", cnt(3) ? "u3" : "");
+    [$("iEqL"), $("iEqR")].forEach(function (col) {
+      col.querySelectorAll(".eq.click").forEach(function (el) {
+        el.addEventListener("click", function () {
+          var a = el.dataset.act;
+          if (a === "acc") send("invacc");
+          else if (a === "u3") send("invuse 3");
+          else { send("inv " + a.slice(1)); closePanels(true); }
+        });
+      });
+    });
+    $("iSkin").textContent = "Скін #" + inv[14];
+    $("iCash").textContent = money(inv[0]); $("iBank").textContent = money(inv[1]);
+    var w = weight(); $("iW").textContent = w.toFixed(1); $("iWBar").style.width = Math.min(100, w / MAXW * 100) + "%";
+  }
+  var menuFor = null;
+  function openMenu(c, el) {
+    menuFor = c;
+    var it = c.i != null ? ITEMS[c.i] : null, m = $("iMenu");
+    setGi($("mIco"), it ? it[1] : c.img);
+    $("mName").textContent = it ? it[0] : c.name;
+    $("mQ").textContent = it ? (c.i === 11 ? money(cnt(11)) : cnt(c.i) + " шт. · " + (it[2] * cnt(c.i)).toFixed(2).replace(/\.?0+$/, "") + " кг") : (c.q ? c.q : "");
+    $("mDesc").textContent = it ? it[3] : c.desc;
+    $("aUse").disabled = !(it ? c.i !== 11 && c.i !== 10 : !!c.acc);
+    $("aDrop").disabled = $("aGive").disabled = !(it && it[4] === 1);
+    show(m, true);
+    if (el) {
+      var r = el.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+      var x = r.right + 10, y = r.top;
+      if (x + mw > innerWidth - 10) x = r.left - mw - 10;
+      if (y + mh > innerHeight - 10) y = innerHeight - mh - 10;
+      m.style.left = x + "px"; m.style.top = y + "px";
+    }
+  }
+  function closeMenu() { menuFor = null; show($("iMenu"), false); }
+  $("iMenu").addEventListener("click", function (e) { e.stopPropagation(); });
+  $("inv").addEventListener("click", function () { if (menuFor) { closeMenu(); selKey = null; render(); } });
+  function doUse() {
+    var c = menuFor || cellsFor(tab).filter(function (x) { return x.k === selKey; })[0];
+    if (!c) return;
+    if (c.acc) { send("invacc"); return; }
+    if (c.i == null || c.i === 11 || c.i === 10) return;
+    if (c.i <= 2) { send("inv " + c.i); closePanels(true); return; }   // телефон / документи - закриваємо інвентар
+    send("invuse " + c.i);
+  }
+  $("aUse").addEventListener("click", doUse);
+  $("aDrop").addEventListener("click", function () { if (menuFor && menuFor.i != null) send("invdrop " + menuFor.i); });
+  $("aGive").addEventListener("click", function () { if (menuFor && menuFor.i != null) send("invgive " + menuFor.i); });
+  $("iTabs").querySelectorAll("button").forEach(function (b) {
+    b.addEventListener("click", function (e) {
+      e.stopPropagation();
+      tab = b.dataset.t; selKey = null; closeMenu();
+      $("iTabs").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); });
+      render();
+    });
+  });
+  // вікно персонажа: сервер малює модель скіна саме в цьому прямокутнику (координати 640x448)
+  // v16.2: замість моделі з гри - силует (модель просвічувала чат і світ гри)
+  function sendPreview() { }
+  on("inv", function (d) {
+    var wasOpen = !$("inv").classList.contains("hidden");
+    inv = d.split("|");
+    if (!wasOpen) { closePanels(true); tab = "all"; selKey = null; closeMenu(); $("iTabs").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x.dataset.t === "all"); }); }
+    show($("inv"), true);
+    document.body.classList.add("inv-open");
+    render();
+    if (menuFor) { var still = cellsFor(tab).filter(function (x) { return x.k === menuFor.k; })[0]; if (still) openMenu(still, $("iGrid").querySelector(".cell.sel")); else closeMenu(); }
+    syncFocus();
+    if (!wasOpen) requestAnimationFrame(function () { setTimeout(sendPreview, 260); });
+  });
+  $("iX").addEventListener("click", function (e) { e.stopPropagation(); send("inv -1"); closePanels(true); });
+  $("iList").addEventListener("click", function (e) { e.stopPropagation(); send("inv 99"); closePanels(true); });
+
+  /* ---------------- документи ---------------- */
+  var docT;
+  on("doc", function (d) {
+    var p = d.split("|"), el = $("doc"), h = "";
+    if (p[0] === "pass") {
+      // pass|ім'я|стать|вік|робота|фракція|номер|рівень|NICK
+      var ini = p[1].split(" ").map(function (w) { return w.charAt(0); }).join("").slice(0, 2);
+      h = '<div class="doc-head pass"><b>УКРАЇНА</b><span>ПАСПОРТ ГРОМАДЯНИНА</span></div>' +
+        '<div class="doc-body"><div class="doc-photo">' + esc(ini) + '</div><div class="doc-fields">' +
+        f("Ім'я", p[1]) + f("Стать / вік", p[2] + ", " + p[3]) + f("Робота", p[4]) + f("Організація", p[5]) +
+        '</div><div class="doc-fields right">' + f("Номер", "UA " + p[6]) + f("У штаті", p[7] + " р.") + '</div></div>' +
+        '<div class="doc-mrz">P&lt;UKR' + esc(p[8].toUpperCase()).replace(/_/g, "&lt;") + '&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>';
+    } else {
+      // lic|ім'я|водій 0/1|зброя 0/1
+      h = '<div class="doc-head lic"><b>ЛІЦЕНЗІЇ</b><span>МВС УКРАЇНИ</span></div>' +
+        '<div class="doc-body col"><div class="doc-fields">' + f("Власник", p[1]) + '</div>' +
+        row("Посвідчення водія (B)", p[2] === "1", "Дійсне") + row("Дозвіл на зброю", p[3] === "1", "Дійсний") + '</div>';
+    }
+    el.innerHTML = h;
+    show(el, true);
+    clearTimeout(docT);
+    docT = setTimeout(function () { show(el, false); }, 12000);
+  });
+  function f(k, v) { return '<div class="fld"><small>' + k + '</small><b>' + esc(v || "—") + '</b></div>'; }
+  function row(k, ok, yes) { return '<div class="lic-row"><span>' + k + '</span><b class="' + (ok ? "ok" : "no") + '">' + (ok ? yes : "Немає") + '</b></div>'; }
+
+  function closePanels(silent) { document.body.classList.remove("phone-open", "inv-open", "bp-open", "cs-open"); if ($("iMenu")) show($("iMenu"), false); show($("phone"), false); show($("inv"), false); show($("bp"), false); if (typeof csStop === "function" && !$("cs").classList.contains("hidden")) csStop(); show($("cs"), false); unfocus(); }
+
+  /* ---------------- нагороди (батлпас, кейси) ---------------- */
+  // тип: 0 гроші, 1 кейс, 2 досвід, 3 аптечки, 4 VIP
+  var REW = [
+    { img: "money", f: function (n) { return money(n); }, s: "Гроші" },
+    { img: "box", f: function (n) { return "Кейс ×" + n; }, s: "Кейс" },
+    { img: "star", f: function (n) { return "+" + n + " досвіду"; }, s: "Досвід" },
+    { img: "medkit", f: function (n) { return "Аптечки ×" + n; }, s: "Аптечки" },
+    { img: "crown", f: function (n) { return "VIP " + n + " дн."; }, s: "VIP-статус" }
+  ];
+  function rew(t, n) { var r = REW[+t] || REW[0]; return { img: r.img, name: r.f(+n), sub: r.s }; }
+  function rarity(t, n) {
+    t = +t; n = +n;
+    if (t === 4) return n >= 7 ? 4 : 3;
+    if (t === 0) return n >= 50000 ? 4 : n >= 15000 ? 3 : n >= 7500 ? 2 : n >= 3000 ? 1 : 0;
+    if (t === 1) return n >= 4 ? 3 : n >= 2 ? 2 : 1;
+    return t === 2 ? (n >= 6 ? 2 : 1) : 1;
+  }
+
+  /* ---------------- батлпас ---------------- */
+  var bpScrolled = false;
+  on("bp", function (d) {
+    var p = d.split("|"), lvl = +p[0], prem = p[4] === "1", got = +p[5], gotP = +p[6], max = +p[3];
+    var wasOpen = !$("bp").classList.contains("hidden");
+    if (!wasOpen) { closePanels(true); bpScrolled = false; }
+    $("bpLvl").textContent = lvl;
+    $("bpXpT").textContent = lvl >= max ? "МАКС." : (p[1] + " / " + p[2]);
+    $("bpBar").style.width = (lvl >= max ? 100 : Math.min(100, p[1] / p[2] * 100)) + "%";
+    $("bpCaseN").textContent = p[8];
+    var fr = p[9].split(";"), pr = p[10].split(";"), h = "";
+    for (var i = 0; i < max; i++) {
+      var open = i < lvl, a = fr[i].split(":"), b = pr[i].split(":"), ra = rew(a[0], a[1]), rb = rew(b[0], b[1]);
+      var gA = (got >> i) & 1, gB = (gotP >> i) & 1;
+      var cA = gA ? " got" : open ? " can" : " lock", cB = gB ? " got" : (open && prem) ? " can" : " lock";
+      h += '<div class="bp-col' + (open ? " open" : "") + (i === lvl ? " cur" : "") + '"><div class="bp-num">' + (i + 1) + '</div>' +
+        '<div class="bp-card r' + rarity(a[0], a[1]) + cA + '" data-l="' + i + '" data-t="0"><i class="gi" style="--i:url(img/' + ra.img + '.svg)"></i><b>' + esc(ra.name) + '</b>' + (cA === " can" ? "<em>Забрати</em>" : "") + '</div>' +
+        '<div class="bp-card prem r' + rarity(b[0], b[1]) + cB + '" data-l="' + i + '" data-t="1"><i class="gi" style="--i:url(img/' + rb.img + '.svg)"></i><b>' + esc(rb.name) + '</b>' + (cB === " can" ? "<em>Забрати</em>" : "") + '</div></div>';
+    }
+    $("bpTrack").innerHTML = h;
+    var tk = p[11].split(";"), th = "", fl = +p[12], ph = "";
+    $("bpBz").textContent = p[13] || 0;
+    var doneN = 0, doneP = 0;
+    tk.forEach(function (x, k) {
+      var q = x.split("~"), done = q[3] === "1", pc = Math.min(100, q[1] / q[2] * 100), pm = q[4] === "1";
+      var row = '<div class="bp-task' + (done ? " done" : "") + (pm && !prem ? " lock" : "") + '"><span>' + esc(q[0]) + '</span><b>' + (done ? "Виконано" : (pm && !prem) ? "Преміум" : q[1] + " / " + q[2]) + '</b><div class="bp-bar"><i style="width:' + pc + '%"></i></div></div>';
+      if (pm) { ph += row; if (done) doneP++; } else { th += row; if (done) doneN++; }
+    });
+    $("bpTasks").innerHTML = th;
+    $("bpBonus").textContent = (fl & 33554432) ? "Нагороду дня отримано: $5 000 + кейс ✓ · інші завдання дають досвід" : "Виконайте будь-які 4 завдання — $5 000 і кейс. Виконано: " + doneN + " / 4";
+    $("bpPrem").innerHTML = (prem
+      ? '<h2>Преміум-завдання</h2><p>' + ((fl & 67108864) ? "Нагороду отримано: $15 000 + 2 кейси ✓" : "Будь-які 4 — $15 000 і 2 кейси. Виконано: " + doneP + " / 4") + '</p>'
+      : '<h2>Преміум-батлпас</h2><p>Золота доріжка нагород (VIP до 30 днів) і 10 преміум-завдань щодня.</p><button class="bp-buy" id="bpBuy">Активувати · ' + p[7] + ' BC</button>') +
+      '<div class="bp-ptasks">' + ph + '</div>';
+    if ($("bpBuy")) $("bpBuy").addEventListener("click", function (e) { e.stopPropagation(); send("bpbuy"); });
+    show($("bp"), true);
+    document.body.classList.add("bp-open");
+    syncFocus();
+    if (!bpScrolled) { bpScrolled = true; var t = $("bpTrack"), c = t.children[Math.max(0, lvl - 2)]; t.style.scrollBehavior = "auto"; t.scrollLeft = c ? c.offsetLeft - t.offsetLeft : 0; t.style.scrollBehavior = ""; }
+  });
+  $("bpTrack").addEventListener("click", function (e) {
+    var c = e.target.closest(".bp-card.can"); if (!c) return;
+    send("bpc " + c.dataset.l + " " + c.dataset.t);
+  });
+  $("bpTrack").addEventListener("wheel", function (e) { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); this.scrollLeft += e.deltaY; } }, { passive: false });
+  $("bpX").addEventListener("click", function (e) { e.stopPropagation(); send("panelx"); closePanels(true); });
+  $("bpCases").addEventListener("click", function (e) { e.stopPropagation(); send("bpcase"); });
+  $("bpDon").addEventListener("click", function (e) { e.stopPropagation(); send("bpdon"); });
+
+  /* ---------------- кейси ---------------- */
+  var csPrizes = [], csBusy = false, csWatch = null, csLeftN = 0;
+  function csUnstick() { csBusy = false; $("csStage").classList.remove("shake"); csLeft(csLeftN); }
+  function csItem(p, i) {
+    var r = rew(p[0], p[1]), rr = rarity(p[0], p[1]);
+    return '<div class="cs-item r' + rr + '"' + (i != null ? ' data-i="' + i + '"' : "") + '><i class="gi" style="--i:url(img/' + r.img + '.svg)"></i><b>' + esc(r.name) + '</b><small>' + r.sub + '</small></div>';
+  }
+  function csLeft(n) { csLeftN = n; $("csLeft").textContent = "Залишилось " + n + " шт."; $("csOpen").disabled = !(+n > 0); $("csQuick").disabled = !(+n > 0); $("csOpen").textContent = +n > 0 ? "Відкрити" : "Немає кейсів"; }
+  on("case", function (d) {
+    var p = d.split("|");
+    if (!csBusy && $("cs").classList.contains("hidden")) closePanels(true);
+    csPrizes = p[2].split(";").map(function (x) { return x.split(":"); });
+    $("csNext").textContent = "Наступний безкоштовний: " + p[1] + " хв у грі";
+    var sorted = csPrizes.map(function (x, i) { return { x: x, i: i }; }).sort(function (a, b) { return (rarity(b.x[0], b.x[1]) - rarity(a.x[0], a.x[1])) || (a.x[2] - b.x[2]); });
+    $("csList").innerHTML = sorted.map(function (o) { return csItem(o.x); }).join("");
+    if (!csBusy) { csLeft(p[0]); csReset(); }
+    show($("cs"), true);
+    document.body.classList.add("cs-open");
+    syncFocus();
+  });
+  var csFast = false;
+  $("csQuick").addEventListener("click", function (e) {
+    e.stopPropagation(); if (csBusy || this.disabled) return;
+    csReset(); csFast = true; csBusy = true; this.disabled = true; $("csOpen").disabled = true; send("caseopen 1");
+    clearTimeout(csWatch); csWatch = setTimeout(csUnstick, 4000);
+  });
+  $("csOpen").addEventListener("click", function (e) { e.stopPropagation(); if (csBusy || this.disabled) return; csReset(); csFast = false; csBusy = true; this.disabled = true; $("csQuick").disabled = true; $("csStage").classList.add("shake"); send("caseopen");
+    clearTimeout(csWatch); csWatch = setTimeout(csUnstick, 4000);   // відповіді нема - розблокувати
+  });
+  // v17.1: анімація повернута - скриня трясеться, кришка відкривається (11 кадрів), спалах, монетки, рулетка
+  var csFrameT = null, csTick = null, csT2 = null, csT3 = null;
+  function csFrame(i) { $("csImg").style.backgroundPosition = (i / 10 * 100) + "% 0"; }
+  function csReset() {
+    clearInterval(csFrameT); clearTimeout(csTick); clearTimeout(csT2); clearTimeout(csT3);
+    show($("csRoll"), false); show($("csWin"), false); csFrame(0);
+    var st = $("csStage"); st.classList.remove("burst"); st.classList.remove("shake");
+    $("csFx").innerHTML = ""; $("csImg").style.visibility = "";
+  }
+  function csOpenAnim() {
+    var i = 0, st = $("csStage"), fx = $("csFx");
+    clearInterval(csFrameT);
+    csFrameT = setInterval(function () { csFrame(++i); if (i >= 10) clearInterval(csFrameT); }, 45);
+    st.classList.remove("burst"); void st.offsetWidth; st.classList.add("burst");
+    fx.innerHTML = "";
+    for (var k = 0; k < 20; k++) {
+      var e = document.createElement("i"), ang = -Math.PI / 2 + (Math.random() - .5) * 2.4, dist = 14 + Math.random() * 22;
+      if (k % 3 === 0) e.className = "s";
+      e.style.setProperty("--x", (Math.cos(ang) * dist).toFixed(1) + "vh");
+      e.style.setProperty("--y", (Math.sin(ang) * dist).toFixed(1) + "vh");
+      e.style.animationDelay = (Math.random() * .25).toFixed(2) + "s";
+      fx.appendChild(e);
+    }
+  }
+  on("caseroll", function (d) {
+    clearTimeout(csWatch);
+    var p = d.split("|"), w = +p[0], N = 40, WIN = 34, items = [];
+    if (csFast) {   // швидке відкриття - одразу приз
+      csFrame(10);
+      $("csWCard").innerHTML = csItem(csPrizes[w]);
+      show($("csWin"), true);
+      csBusy = false;
+      csLeft(p[1]);
+      return;
+    }
+    var tot = csPrizes.reduce(function (s, x) { return s + (+x[2]); }, 0);
+    for (var k = 0; k < N; k++) {
+      var idx = w;
+      if (k !== WIN) { var r = Math.random() * tot; for (var j = 0; j < csPrizes.length; j++) { r -= +csPrizes[j][2]; if (r < 0) { idx = j; break; } } }
+      items.push(csItem(csPrizes[idx]));
+    }
+    var strip = $("csStrip");
+    strip.innerHTML = items.join("");
+    strip.style.transition = "none"; strip.style.transform = "translateX(0)";
+    csTick = setTimeout(function () { $("csStage").classList.remove("shake"); csOpenAnim(); }, 700);
+    csT2 = setTimeout(function () {
+      $("csImg").style.visibility = "hidden";
+      show($("csRoll"), true);
+      var it = strip.children[WIN], step = it.offsetWidth + parseFloat(getComputedStyle(strip).gap || 0);
+      var off = WIN * step + it.offsetWidth / 2 + (Math.random() - .5) * it.offsetWidth * .6;
+      requestAnimationFrame(function () {
+        strip.style.transition = "transform 5.4s cubic-bezier(.08,.6,.12,1)";
+        strip.style.transform = "translateX(" + (-off) + "px)";
+      });
+      csT3 = setTimeout(function () {
+        $("csWCard").innerHTML = csItem(csPrizes[w]);
+        show($("csWin"), true);
+        csBusy = false;
+        csLeft(p[1]);
+      }, 5700);
+    }, 2300);
+  });
+  $("csOk").addEventListener("click", function (e) { e.stopPropagation(); csReset(); });
+  $("csX").addEventListener("click", function (e) { e.stopPropagation(); csStop(); send("panelx"); closePanels(true); });
+  // закрити можна будь-коли - приз уже зараховано на сервері
+  function csStop() { clearTimeout(csWatch); csBusy = false; csReset(); }
+
+  /* ---------------- гарячі клавіші (B / P / I) ---------------- */
+  // браузер слухає клавіші завжди (cef_always_listen_keys), тому стежимо, чи відкрито чат гри (T/F6 ... Enter/Esc)
+  var lastHot = 0;
+  // фізична клавіша незалежно від розкладки (EN / UA / RU)
+  var CYR = { "и": 66, "з": 80, "ш": 73, "е": 84, "ё": 192, "'": 192 };
+  function keyOf(e) {
+    var code = e.code || "";
+    if (/^Key[A-Z]$/.test(code)) return code.charCodeAt(3);
+    if (code === "Backquote") return 192;
+    var k = (e.key || "").toLowerCase();
+    if (CYR[k]) return CYR[k];
+    if (k.length === 1 && k >= "a" && k <= "z") return k.toUpperCase().charCodeAt(0);
+    var c = e.keyCode || e.which || 0;
+    if (c >= 1040) { var ch = String.fromCharCode(c).toLowerCase(); if (CYR[ch]) return CYR[ch]; }
+    return c;
+  }
+  function hotKey(e) {
+    if (dlg) return false;
+    var t = document.activeElement; if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return false;
+    var c = keyOf(e);
+    var k = c === 66 ? "b" : c === 80 ? "p" : c === 73 ? "i" : "";
+    if (!k || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return false;
+    if (Date.now() - lastHot < 350) return true;
+    lastHot = Date.now();
+    if (!$("cs").classList.contains("hidden")) csStop();
+    send("key " + k);
+    return true;
+  }
+  function anyPanel() { return ["phone", "inv", "bp", "cs"].some(function (id) { return !$(id).classList.contains("hidden"); }); }
+  on("panel", function () { closePanels(true); });
+
+  /* ---------------- клавіатура ---------------- */
+  document.addEventListener("keydown", function (e) {
+    if (hotKey(e)) { e.preventDefault(); return; }
+    if (dlg) {
+      if (e.key === "Enter") { e.preventDefault(); respond(1); }
+      else if (e.key === "Escape") { e.preventDefault(); respond(0); }
+      else if ((dlg.style === 2 || dlg.style === 4 || dlg.style === 5) && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+        e.preventDefault(); select(dlg.sel + (e.key === "ArrowDown" ? 1 : -1));
+      }
+      return;
+    }
+    if (e.key === "Escape" || e.key === "Backspace") {
+      if (!$("phone").classList.contains("hidden")) { send("ph -1"); closePanels(true); }
+      else if (!$("inv").classList.contains("hidden")) { send("inv -1"); closePanels(true); }
+      else if (!$("bp").classList.contains("hidden")) { send("panelx"); closePanels(true); }
+      else if (!$("cs").classList.contains("hidden")) { csStop(); send("panelx"); closePanels(true); }
+    }
+  });
+
+})();
