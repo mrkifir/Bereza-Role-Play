@@ -1,0 +1,75 @@
+{
+ "version": "1.0.0",
+ "server": {
+  "name": "Bereza Role Play",
+  "host": "188.127.241.74",
+  "port": 2406
+ },
+ "packages": [
+  {
+   "id": "cef",
+   "name": "Сучасний інтерфейс (CEF)",
+   "version": "1",
+   "url": "https://github.com/mrkifir/Bereza-Role-Play/releases/download/cef-player/BerezaRP-CEF.zip",
+   "size": 163221320,
+   "sha256": "",
+   "strip": "BerezaRP-CEF/",
+   "skip": [
+    "ASI_Loader/",
+    "README_UA.txt",
+    "cef/assets/"
+   ],
+   "asiLoader": "ASI_Loader/dinput8.dll",
+   "check": [
+    "cef.asi",
+    "cef/libcef.dll",
+    "cef/cef-renderer.exe"
+   ],
+   "optional": false
+  },
+  {
+   "id": "ui",
+   "name": "Інтерфейс Bereza",
+   "version": "172",
+   "url": "https://mrkifir.github.io/Bereza-Role-Play/launcher/files/bereza-ui.zip",
+   "size": 940625,
+   "sha256": "9e203c5839bf5d209cbebc957de7db9c1d89ea0b2c0adb1ec4eecafbe105ef24",
+   "strip": "",
+   "skip": [],
+   "check": [
+    "cef/assets/bereza/index.html"
+   ],
+   "optional": true
+  }
+ ],
+ "news": [
+  {
+   "title": "Відкриття Bereza Role Play",
+   "body": "Сервер відкрито для першої хвилі гравців. Створюйте персонажа у форматі Ім'я_Прізвище і заходьте!",
+   "date": "02.11.2026",
+   "tag": "Анонс"
+  },
+  {
+   "title": "Батлпас «Осінь у Березі»",
+   "body": "30 рівнів нагород, преміум-доріжка, 15 щоденних завдань і 10 преміум. Відкривається клавішею B.",
+   "date": "02.11.2026",
+   "tag": "Оновлення"
+  },
+  {
+   "title": "Кейси та скарби",
+   "body": "Кейс кожні 3 години гри, швидке відкриття, а кожні 30 хвилин у місті ховають валізу з грошима (/treasure).",
+   "date": "02.11.2026",
+   "tag": "Оновлення"
+  },
+  {
+   "title": "2000+ будинків",
+   "body": "Зелений будиночок на карті — вільний, червоний — зайнятий. Найближчий вільний: /findhouse.",
+   "date": "02.11.2026",
+   "tag": "Світ"
+  }
+ ],
+ "site": "",
+ "discord": "",
+ "telegram": "",
+ "donate": ""
+}

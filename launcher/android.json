@@ -1,0 +1,29 @@
+{
+ "manifestVersion": 1,
+ "gameVersion": "1.0.0",
+ "minLauncherVersionCode": 1,
+ "server": {
+  "name": "Bereza Role Play",
+  "host": "188.127.241.74",
+  "port": 2406,
+  "clientVersion": "0.3.7"
+ },
+ "files": [],
+ "client": {
+  "displayName": "SAMP Mobile",
+  "packageName": "game.samp.ru",
+  "minVersionCode": 0,
+  "apkUrl": "",
+  "apkSha256": "",
+  "apkSize": 0,
+  "signingCertSha256": "",
+  "infoUrl": ""
+ },
+ "launch": {
+  "mode": "none",
+  "activity": "",
+  "extras": {},
+  "uriTemplate": "",
+  "configFile": null
+ }
+}
