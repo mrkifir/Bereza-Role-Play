@@ -11,7 +11,7 @@
  "files": [],
  "client": {
   "displayName": "SAMP Mobile",
-  "packageName": "game.samp.ru",
+  "packageName": "game.samp.ru,com.samp.mobile,ru.samp.mobile,com.sampmobile.game,com.rockstargames.gtasa",
   "minVersionCode": 0,
   "apkUrl": "",
   "apkSha256": "",
