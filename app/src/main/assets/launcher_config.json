@@ -1,0 +1,6 @@
+{
+  "server": { "name": "Bereza Role Play", "host": "188.127.241.74", "port": 2406 },
+  "manifestUrl": "https://mrkifir.github.io/Bereza-Role-Play/launcher/v2/manifest.json",
+  "newsUrl": "https://mrkifir.github.io/Bereza-Role-Play/launcher/news.json",
+  "links": { "site": "", "discord": "", "telegram": "" }
+}
