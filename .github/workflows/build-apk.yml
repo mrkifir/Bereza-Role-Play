@@ -32,7 +32,18 @@ jobs:
         continue-on-error: true
         env:
           LIVE_QUERY: "1"
-        run: ./gradlew --no-daemon testDebugUnitTest --tests '*SampQueryTest.liveServer' --rerun 2>&1 | grep -E "LIVE|PASSED|FAILED|SKIPPED" || true
+        run: |
+          python3 - <<'PY'
+          import socket, struct, time
+          s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.settimeout(4)
+          p = b'SAMP' + bytes([188,127,241,74]) + struct.pack('<H', 2406) + b'i'
+          for i in range(3):
+              t = time.time(); s.sendto(p, ('188.127.241.74', 2406))
+              try:
+                  d = s.recv(4096); print('PY LIVE ok', round((time.time()-t)*1000), 'ms', len(d), 'bytes', d[11:60]); break
+              except Exception as e: print('PY LIVE attempt', i, e)
+          PY
+          ./gradlew --no-daemon testDebugUnitTest --tests '*SampQueryTest.liveServer' --rerun 2>&1 | grep -E "LIVE|liveServer|Exception|at ua\.bereza" | head -20 || true
 
       - name: Report build errors
         if: failure()
