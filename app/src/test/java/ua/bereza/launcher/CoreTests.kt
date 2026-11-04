@@ -132,7 +132,7 @@ class LinksAndPathsTest {
 
 class ZipAndPlannerTest {
     private fun zip(vararg entries: Pair<String, ByteArray>): File {
-        val f = File.createTempFile("t", ".zip")
+        val f = File.createTempFile("bereza", ".zip")
         ZipOutputStream(f.outputStream()).use { z -> entries.forEach { (n, b) -> z.putNextEntry(ZipEntry(n)); z.write(b); z.closeEntry() } }
         return f
     }
