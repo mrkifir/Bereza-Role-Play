@@ -1,0 +1,17 @@
+{
+  "schema": 2,
+  "version": "2026.11.04-1",
+  "minLauncherVersionCode": 1,
+  "baseUrl": "",
+  "files": [
+    {
+      "path": "mods/bereza-ui.zip",
+      "url": "https://mrkifir.github.io/Bereza-Role-Play/launcher/files/bereza-ui.zip",
+      "size": 940625,
+      "sha256": "9e203c5839bf5d209cbebc957de7db9c1d89ea0b2c0adb1ec4eecafbe105ef24",
+      "extractTo": "mods/bereza-ui",
+      "title": "Інтерфейс Bereza RP"
+    }
+  ],
+  "remove": []
+}
