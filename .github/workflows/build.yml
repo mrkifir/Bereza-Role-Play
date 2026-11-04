@@ -4,8 +4,12 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -24,3 +28,14 @@ jobs:
         with:
           name: OpenSAMPLauncher-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Commit APK to branch
+        if: "!contains(github.event.head_commit.message, '[skip ci]')"
+        run: |
+          mkdir -p out
+          cp app/build/outputs/apk/debug/*.apk out/OpenSAMPLauncher.apk
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add out/OpenSAMPLauncher.apk
+          git commit -m "APK [skip ci]"
+          git push
