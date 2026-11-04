@@ -12,7 +12,7 @@ Kotlin + Jetpack Compose. Гілка `launcher-v2`. APK збирає GitHub Acti
 
 ## Що НЕ працює (свідомо)
 Запуск гри. Кнопка «ГРАТИ» вимкнена й показує причину: немає Android-клієнта SA-MP з підтвердженою ліцензією.
-Точка інтеграції — `client/GameClient.kt`, деталі — `docs/CLIENT_INTEGRATION.md`.
+Точка інтеграції — `client/GameClient.kt`, деталі — `docs/CLIENT_INTEGRATION.md`. Дослідження легальних варіантів — `docs/RESEARCH.md`.
 
 ## Файли гри
 Лаунчер кладе їх у `Android/data/ua.bereza.rp.launcher/files/game/` (дозволи на сховище не потрібні).
