@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:fillViewport="true">
+<LinearLayout
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="24dp" android:gravity="center_horizontal">
+
+    <ImageView android:layout_width="96dp" android:layout_height="96dp"
+        android:layout_marginTop="32dp" android:src="@drawable/ic_launcher"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" android:text="@string/app_name"
+        android:textColor="#FFFFFFFF" android:textSize="28sp" android:textStyle="bold"/>
+
+    <TextView android:id="@+id/server" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="4dp" android:textColor="#FF8B949E" android:textSize="14sp"/>
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="40dp" android:text="Нікнейм"
+        android:textColor="#FF8B949E" android:textSize="13sp"/>
+
+    <EditText android:id="@+id/nick" android:layout_width="match_parent" android:layout_height="52dp"
+        android:layout_marginTop="6dp" android:background="@drawable/input_bg"
+        android:paddingStart="16dp" android:paddingEnd="16dp"
+        android:hint="Ім'я_Прізвище" android:textColorHint="#FF484F58"
+        android:textColor="#FFFFFFFF" android:textSize="17sp"
+        android:inputType="textNoSuggestions|textVisiblePassword" android:maxLength="24"
+        android:singleLine="true" android:imeOptions="actionDone"/>
+
+    <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="28dp" android:textColor="#FFC9D1D9" android:textSize="14sp"/>
+
+    <ProgressBar android:id="@+id/progress"
+        style="@android:style/Widget.Material.ProgressBar.Horizontal"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" android:max="1000" android:visibility="gone"/>
+
+    <Button android:id="@+id/main" android:layout_width="match_parent" android:layout_height="56dp"
+        android:layout_marginTop="20dp" android:background="@drawable/btn_main"
+        android:text="Грати" android:textColor="#FFFFFFFF" android:textSize="18sp"
+        android:textStyle="bold" android:textAllCaps="false" android:stateListAnimator="@null"/>
+
+    <TextView android:id="@+id/extra" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="18dp" android:padding="8dp"
+        android:text="Обрати APK клієнта вручну" android:textColor="#FF58A6FF" android:textSize="14sp"/>
+
+    <TextView android:id="@+id/redownload" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:padding="8dp" android:text="Перекачати кеш" android:textColor="#FF58A6FF" android:textSize="14sp"/>
+</LinearLayout>
+</ScrollView>
