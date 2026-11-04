@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
     static final String SERVER_IP = "188.127.241.74";
     static final int SERVER_PORT = 2406;
     static final String CACHE_URL =
-            "https://www.dropbox.com/scl/fi/h8ne4u9mn3u45x8h015z9/cache.zip?rlkey=v55ae68s0egn9zqgyu8cy4bab&st=ej74439p&dl=1";
+            "https://www.dropbox.com/scl/fi/h8ne4u9mn3u45x8h015z9/cache.zip?rlkey=v55ae68s0egn9zqgyu8cy4bab&st=pe9pove3&dl=1";
     /** Пряме посилання на APK клієнта (необов'язково). Порожнє = шукати APK у cache.zip або обрати вручну. */
     static final String CLIENT_APK_URL = "";
     static final String GAME_PKG = "com.rockstargames.gtasa";
@@ -67,6 +67,7 @@ public class MainActivity extends Activity {
     private SharedPreferences prefs;
     private Storage storage;
     private volatile boolean busy;
+    private boolean pendingInstall;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -111,7 +112,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (prefs != null && !busy && storage != null) refresh(false);
+        if (prefs == null || busy || storage == null) return;
+        if (pendingInstall && (Build.VERSION.SDK_INT < 26 || getPackageManager().canRequestPackageInstalls())) {
+            pendingInstall = false;
+            File apk = clientApk();
+            if (apk != null && !gameInstalled()) { refresh(false); installApk(apk); return; }
+        }
+        refresh(false);
     }
 
     @Override
@@ -181,20 +188,21 @@ public class MainActivity extends Activity {
             if (apk != null) {
                 status.setText("Кеш встановлено. Тепер встанови клієнт SA-MP.");
                 main.setText("Встановити клієнт");
-                if (autoStart || !prefs.getBoolean("asked_install", false)) {
-                    prefs.edit().putBoolean("asked_install", true).apply();
-                    offerInstall(apk);
-                }
+                if (autoStart) installApk(apk);
             } else if (!CLIENT_APK_URL.isEmpty()) {
                 status.setText("Кеш встановлено. Потрібно завантажити клієнт SA-MP.");
                 main.setText("Завантажити клієнт");
+                if (autoStart) startClientDownload();
             } else {
-                status.setText("Кеш встановлено, але клієнт SA-MP (" + GAME_PKG + ") не встановлено.\n"
-                        + "У cache.zip не знайдено APK. Обери APK клієнта вручну.");
-                main.setText("Обрати APK клієнта");
+                status.setText("Кеш встановлено. Потрібна GTA San Andreas (" + GAME_PKG + ").\n"
+                        + "Встанови її з Google Play або обери APK клієнта вручну.");
+                main.setText("GTA SA в Google Play");
             }
             return;
         }
+        File[] old = apkDir().listFiles();
+        if (old != null) for (File f : old) //noinspection ResultOfMethodCallIgnored
+            f.delete();
         status.setText("Все готово. Введи нік і грай!");
         main.setText("Грати");
     }
@@ -207,7 +215,7 @@ public class MainActivity extends Activity {
             File apk = clientApk();
             if (apk != null) installApk(apk);
             else if (!CLIENT_APK_URL.isEmpty()) startClientDownload();
-            else pickApk();
+            else openPlay();
             return;
         }
         play();
@@ -454,6 +462,7 @@ public class MainActivity extends Activity {
     private void installApk(File apk) {
         if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
             toast("Дозволь встановлення з цього джерела і повернись назад");
+            pendingInstall = true;
             startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
                     Uri.parse("package:" + getPackageName())));
             return;
@@ -466,6 +475,15 @@ public class MainActivity extends Activity {
             startActivityForResult(i, RC_INSTALL);
         } catch (Exception e) {
             toast("Не вдалося відкрити встановлювач: " + e.getMessage());
+        }
+    }
+
+    private void openPlay() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + GAME_PKG)));
+        } catch (Exception e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=" + GAME_PKG)));
         }
     }
 
@@ -614,7 +632,7 @@ public class MainActivity extends Activity {
         runOnUiThread(() -> {
             busy = false;
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            refresh(false);
+            refresh(error == null);
             if (error != null) status.setText(error);
         });
     }
