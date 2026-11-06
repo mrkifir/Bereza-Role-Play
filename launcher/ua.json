@@ -1,0 +1,51 @@
+{
+ "version": "1.0.0",
+ "server": {
+  "name": "Bereza RP",
+  "host": "188.127.241.74",
+  "port": 2406
+ },
+ "packages": [
+  {
+   "id": "cef",
+   "name": "Сучасний інтерфейс (CEF)",
+   "version": "1",
+   "url": "https://github.com/mrkifir/Bereza-Role-Play/releases/download/cef-player/BerezaRP-CEF.zip",
+   "size": 163221320,
+   "sha256": "",
+   "strip": "BerezaRP-CEF/",
+   "skip": [
+    "ASI_Loader/",
+    "README_UA.txt",
+    "cef/assets/"
+   ],
+   "asiLoader": "ASI_Loader/dinput8.dll",
+   "check": [
+    "cef.asi",
+    "cef/libcef.dll",
+    "cef/cef-renderer.exe"
+   ],
+   "optional": false
+  },
+  {
+   "id": "ui-ua",
+   "name": "Інтерфейс Bereza",
+   "version": "1",
+   "url": "https://mrkifir.github.io/Bereza-Role-Play/launcher/files/bereza-ua-ui.zip",
+   "size": 1336062,
+   "sha256": "62d432ac4d65c01a4021ec9897f1f8881fe1e1c5ed1437306b763b4c474ab2f2",
+   "strip": "",
+   "skip": [],
+   "check": [
+    "cef/assets/bereza-ua/index.html"
+   ],
+   "optional": true
+  }
+ ],
+ "news": [],
+ "site": "",
+ "discord": "",
+ "telegram": "",
+ "tiktok": "",
+ "donate": ""
+}
